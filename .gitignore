@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Fetched OpenAPI spec (regenerate via `npm run api:sync`)
+/openapi.json
+
+package-lock.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
