@@ -1,5 +1,9 @@
+// In production, calls go through the same-origin /api rewrite in
+// vercel.json (proxied to the Render backend) to avoid CORS. Local dev
+// hits the Render backend directly.
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? "https://cvjury.onrender.com/api"
+  import.meta.env.VITE_API_BASE_URL ??
+  (import.meta.env.PROD ? "/api" : "https://cvjury.onrender.com/api")
 
 const ACCESS_TOKEN_KEY = "cvjury_access_token"
 // Duplicated from auth.ts's USER_KEY to avoid a circular import between the
