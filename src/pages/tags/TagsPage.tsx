@@ -16,25 +16,10 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ApiError } from "@/lib/api-client"
 import { createTag, listTags, type Tag } from "@/lib/tags"
-
-const colorSwatches = [
-  "#E97451",
-  "#2563EB",
-  "#16A34A",
-  "#7C3AED",
-  "#D97706",
-  "#0EA5E9",
-  "#92400E",
-  "#DB2777",
-  "#0D9488",
-  "#4F46E5",
-  "#F87171",
-  "#059669",
-  "#DC2626",
-  "#6B7280",
-]
-
-const DEFAULT_TAG_COLOR = "#6B7280"
+import {
+  COLOR_SWATCHES as colorSwatches,
+  DEFAULT_COLOR as DEFAULT_TAG_COLOR,
+} from "@/lib/colors"
 
 function TagsPage() {
   const [tags, setTags] = useState<Tag[]>([])
@@ -155,7 +140,10 @@ function TagsPage() {
               </DialogHeader>
 
               <div className="flex flex-col gap-2">
-                <Label htmlFor="tag-name" className="text-sm font-medium text-[#161616]">
+                <Label
+                  htmlFor="tag-name"
+                  className="text-sm font-medium text-[#161616]"
+                >
                   Tag Name
                 </Label>
                 <Input
@@ -297,7 +285,10 @@ function TagsPage() {
 
               {!isLoading &&
                 mostUsed.map((tag, index) => (
-                  <li key={tag._id ?? tag.name} className="flex items-start gap-3">
+                  <li
+                    key={tag._id ?? tag.name}
+                    className="flex items-start gap-3"
+                  >
                     <span className="mt-0.5 w-4 shrink-0 text-sm text-[#B0B0B0]">
                       {index + 1}
                     </span>

@@ -1,16 +1,31 @@
-import { CalendarDays, Clock, Copy, Link2, Share2 } from "lucide-react"
+import {
+  CalendarDays,
+  Clock,
+  Copy,
+  Link2,
+  RefreshCw,
+  Share2,
+} from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { BlockRenderer } from "@/components/blocks/BlockRenderer"
+import { renderBlocksToHtml } from "@/lib/blocks/render-html"
+import type { Block } from "@/lib/blocks/types"
 
 type PostPreviewContentProps = {
   title: string
   excerpt: string
-  content: string
+  blocks: Block[]
   tags: string[]
   categoryName: string
   authorName: string
   authorTitle: string
   featuredImageUrl: string
+  reviewerName: string
+  reviewerTitle: string
+  audienceNote: string
+  publishedAt: string
+  updatedAt: string
 }
 
 function slugify(value: string) {
@@ -26,28 +41,41 @@ function initialsFor(name: string) {
   return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?"
 }
 
-function readingTimeFor(html: string) {
-  const text = html.replace(/<[^>]+>/g, " ").trim()
+function readingTimeFor(blocks: Block[]) {
+  const text = renderBlocksToHtml(blocks)
+    .replace(/<[^>]+>/g, " ")
+    .trim()
   const words = text ? text.split(/\s+/).length : 0
   return words === 0 ? 0 : Math.max(1, Math.round(words / 200))
+}
+
+function formatDate(value: string) {
+  const date = value ? new Date(value) : new Date()
+  return date.toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  })
 }
 
 function PostPreviewContent({
   title,
   excerpt,
-  content,
+  blocks,
   tags,
   categoryName,
   authorName,
   authorTitle,
   featuredImageUrl,
+  reviewerName,
+  reviewerTitle,
+  audienceNote,
+  publishedAt,
+  updatedAt,
 }: PostPreviewContentProps) {
-  const readingTime = readingTimeFor(content)
-  const today = new Date().toLocaleDateString(undefined, {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  })
+  const readingTime = readingTimeFor(blocks)
+  const publishedLabel = formatDate(publishedAt)
+  const updatedLabel = updatedAt ? formatDate(updatedAt) : null
 
   return (
     <div className="w-full">
@@ -73,30 +101,47 @@ function PostPreviewContent({
 
         {excerpt && <p className="mt-4 text-base text-[#6B6B6B]">{excerpt}</p>}
 
-        <div className="mt-5 flex flex-col gap-4 border-b border-[#E8E8EC] pb-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar size="lg">
-              <AvatarFallback className="bg-[#FDECE3] font-semibold text-[#E97451]">
-                {initialsFor(authorName)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-semibold text-[#161616]">
-                {authorName}
-              </p>
-              {authorTitle && (
-                <p className="text-xs text-[#8C8C8C]">{authorTitle}</p>
-              )}
+        <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2.5">
+              <Avatar size="lg">
+                <AvatarFallback className="bg-[#FDECE3] font-semibold text-[#E97451]">
+                  {initialsFor(authorName)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-xs text-[#8C8C8C]">
+                  Written By{" "}
+                  <span className="font-semibold text-[#161616]">
+                    {authorName}
+                  </span>
+                </p>
+                {authorTitle && (
+                  <p className="text-xs text-[#8C8C8C]">{authorTitle}</p>
+                )}
+              </div>
             </div>
-            <span className="hidden h-8 w-px bg-[#E8E8EC] sm:block" />
-            <div className="hidden items-center gap-1.5 text-xs text-[#8C8C8C] sm:flex">
-              <CalendarDays className="size-3.5" />
-              {today}
-            </div>
-            <div className="hidden items-center gap-1.5 text-xs text-[#8C8C8C] sm:flex">
-              <Clock className="size-3.5" />
-              {readingTime} min read
-            </div>
+
+            {reviewerName && (
+              <div className="flex items-center gap-2.5">
+                <Avatar size="lg">
+                  <AvatarFallback className="bg-[#161616] font-semibold text-white">
+                    {initialsFor(reviewerName)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="text-xs text-[#8C8C8C]">
+                    Reviewed By{" "}
+                    <span className="font-semibold text-[#161616]">
+                      {reviewerName}
+                    </span>
+                  </p>
+                  {reviewerTitle && (
+                    <p className="text-xs text-[#8C8C8C]">{reviewerTitle}</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2">
@@ -125,6 +170,35 @@ function PostPreviewContent({
           </div>
         </div>
 
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-[#E8E8EC] pb-5 text-xs text-[#8C8C8C]">
+          <div className="flex items-center gap-1.5">
+            <CalendarDays className="size-3.5" />
+            Published <span className="font-medium">{publishedLabel}</span>
+          </div>
+          {updatedLabel && (
+            <>
+              <span className="h-3 w-px bg-[#E8E8EC]" />
+              <div className="flex items-center gap-1.5">
+                <RefreshCw className="size-3.5" />
+                Updated <span className="font-medium">{updatedLabel}</span>
+              </div>
+            </>
+          )}
+          <span className="h-3 w-px bg-[#E8E8EC]" />
+          <div className="flex items-center gap-1.5">
+            <Clock className="size-3.5" />
+            {readingTime} min read
+          </div>
+          {audienceNote && (
+            <>
+              <span className="h-3 w-px bg-[#E8E8EC]" />
+              <span className="font-medium text-[#4A4A4A]">
+                {audienceNote}
+              </span>
+            </>
+          )}
+        </div>
+
         {featuredImageUrl && (
           <img
             src={featuredImageUrl}
@@ -146,11 +220,12 @@ function PostPreviewContent({
           </div>
         )}
 
-        {content ? (
-          <div
-            className="prose prose-sm mt-8 max-w-none"
-            dangerouslySetInnerHTML={{ __html: content }}
-          />
+        {blocks.length > 0 ? (
+          <div className="prose prose-sm mt-8 max-w-none">
+            {blocks.map((block) => (
+              <BlockRenderer key={block.id} block={block} />
+            ))}
+          </div>
         ) : (
           <p className="mt-8 text-sm text-[#8C8C8C]">
             Nothing written yet — head back to the editor to add content.

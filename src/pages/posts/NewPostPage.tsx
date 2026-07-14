@@ -20,7 +20,11 @@ import {
 } from "@/lib/blogs"
 import { listCategories, type Category } from "@/lib/categories"
 import { listTags, type Tag } from "@/lib/tags"
+import { listUsers, type AuthorUser } from "@/lib/users"
 import { getStoredUser } from "@/lib/auth"
+import { blocksFromLegacyContent, parseContentBlocks } from "@/lib/blocks/legacy"
+import { renderBlocksToHtml } from "@/lib/blocks/render-html"
+import type { Block } from "@/lib/blocks/types"
 
 type PublishStatus = "draft" | "schedule" | "publish"
 type ViewMode = "edit" | "preview"
@@ -86,7 +90,7 @@ function NewPostPage() {
 
   const [title, setTitle] = useState("")
   const [excerpt, setExcerpt] = useState("")
-  const [content, setContent] = useState("")
+  const [blocks, setBlocks] = useState<Block[]>([])
 
   const [seoTitle, setSeoTitle] = useState("")
   const [metaDescription, setMetaDescription] = useState("")
@@ -103,6 +107,19 @@ function NewPostPage() {
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const [isLoadingTags, setIsLoadingTags] = useState(true)
   const [featuredImageUrl, setFeaturedImageUrl] = useState("")
+
+  const [reviewers, setReviewers] = useState<AuthorUser[]>([])
+  const [isLoadingReviewers, setIsLoadingReviewers] = useState(true)
+  const [reviewerId, setReviewerId] = useState("")
+  const [audienceNote, setAudienceNote] = useState("")
+  const [publishedAt, setPublishedAt] = useState("")
+  const [updatedAt, setUpdatedAt] = useState("")
+
+  const selectedReviewer = reviewers.find((item) => item._id === reviewerId)
+  const reviewerName = selectedReviewer
+    ? `${selectedReviewer.firstName ?? ""} ${selectedReviewer.lastName ?? ""}`.trim()
+    : ""
+  const reviewerTitle = selectedReviewer?.title ?? ""
 
   useEffect(() => {
     listCategories()
@@ -127,6 +144,18 @@ function NewPostPage() {
   }, [])
 
   useEffect(() => {
+    listUsers()
+      .then((users) => setReviewers(users.filter((u) => u.__t === "reviewer")))
+      .catch((err) => {
+        toast.error(
+          err instanceof ApiError ? err.message : "Unable to load reviewers."
+        )
+      })
+      .finally(() => setIsLoadingReviewers(false))
+  }, [])
+
+
+  useEffect(() => {
     if (!blogId) {
       return
     }
@@ -139,7 +168,10 @@ function NewPostPage() {
           return
         }
         setTitle(blog.title ?? "")
-        setContent(blog.content ?? "")
+        setBlocks(
+          parseContentBlocks(blog.contentBlocks) ??
+            blocksFromLegacyContent(blog.content ?? "")
+        )
         setExcerpt(blog.excerpt ?? "")
         setTags(blog.tags ?? [])
         setCategoryId(blog.categories?.[0]?._id ?? "")
@@ -148,6 +180,10 @@ function NewPostPage() {
         setMetaDescription(blog.metaDescription ?? "")
         setCanonicalUrl(blog.canonicalUrl ?? "")
         setFeaturedImageUrl(blog.featuredImage ?? "")
+        setReviewerId(blog.reviewerId ?? "")
+        setAudienceNote(blog.audienceNote ?? "")
+        setPublishedAt(blog.publishedAt ?? blog.createdAt ?? "")
+        setUpdatedAt(blog.updatedAt ?? "")
         if (blog.scheduledAt) {
           const scheduled = new Date(blog.scheduledAt)
           setScheduleDate(scheduled.toISOString().slice(0, 10))
@@ -174,7 +210,7 @@ function NewPostPage() {
     targetStatus: PublishStatus,
     scheduledAtIso?: string
   ) => {
-    if (!title.trim() || !content.trim()) {
+    if (!title.trim() || blocks.length === 0) {
       toast.error("Title and content are required.")
       return
     }
@@ -188,7 +224,8 @@ function NewPostPage() {
 
       const payload: BlogCreateBody = {
         title: title.trim(),
-        content,
+        content: renderBlocksToHtml(blocks),
+        contentBlocks: blocks,
         author: authorName || "Admin",
         slug: slugify(title),
         status: statusToApi[targetStatus],
@@ -197,6 +234,8 @@ function NewPostPage() {
         categories: categoryId ? [categoryId] : [],
         excerpt,
         featuredImage: featuredImageUrl,
+        reviewerId,
+        audienceNote,
         metaTitle: seoTitle,
         metaDescription,
         canonicalUrl,
@@ -271,12 +310,17 @@ function NewPostPage() {
             <PostPreviewContent
               title={title}
               excerpt={excerpt}
-              content={content}
+              blocks={blocks}
               tags={tags}
               categoryName={previewCategoryName}
               authorName={previewAuthorName}
               authorTitle={user?.title ?? ""}
               featuredImageUrl={featuredImageUrl}
+              reviewerName={reviewerName}
+              reviewerTitle={reviewerTitle}
+              audienceNote={audienceNote}
+              publishedAt={publishedAt}
+              updatedAt={updatedAt}
             />
           </div>
         </div>
@@ -328,8 +372,8 @@ function NewPostPage() {
                   onTitleChange={setTitle}
                   excerpt={excerpt}
                   onExcerptChange={setExcerpt}
-                  content={content}
-                  onContentChange={setContent}
+                  blocks={blocks}
+                  onBlocksChange={setBlocks}
                 />
               ) : (
                 <PostSeoEditor
@@ -369,6 +413,14 @@ function NewPostPage() {
               }
               featuredImageUrl={featuredImageUrl}
               onFeaturedImageChange={setFeaturedImageUrl}
+              reviewers={reviewers}
+              isLoadingReviewers={isLoadingReviewers}
+              reviewerId={reviewerId}
+              onReviewerIdChange={(value) =>
+                setReviewerId(value === "none" ? "" : value)
+              }
+              audienceNote={audienceNote}
+              onAudienceNoteChange={setAudienceNote}
             />
           </div>
         )}

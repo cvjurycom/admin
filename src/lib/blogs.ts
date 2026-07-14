@@ -1,5 +1,6 @@
 import { apiFetch, fetchAllPages } from "@/lib/api-client"
 import type { components } from "@/api/schema"
+import type { Block } from "@/lib/blocks/types"
 
 /**
  * The live API accepts and returns a much richer field set on Blog records
@@ -8,6 +9,22 @@ import type { components } from "@/api/schema"
  * SEO/OG/Twitter metadata all persist even though they're undocumented.
  */
 type BlogSeoFields = {
+  /**
+   * The block-based builder's `Block[]`, sent/returned as a real array (not
+   * a JSON string) — best-effort field, not in the OpenAPI spec. Falls back
+   * to re-wrapping `content` as a single richtext block on load if it's
+   * missing. See src/lib/blocks/legacy.ts.
+   */
+  contentBlocks?: Block[]
+  /**
+   * References a User whose __t is "reviewer" (see src/lib/users.ts). Sent
+   * best-effort — not in the OpenAPI spec. `reviewerName`/`reviewerTitle`
+   * free-text fields were tried first but the backend hard-rejects unknown
+   * fields on this endpoint ("X is not allowed"), so this only works if the
+   * backend recognizes `reviewerId` specifically.
+   */
+  reviewerId?: string
+  audienceNote?: string
   excerpt?: string
   featuredImage?: string
   featuredImageAlt?: string

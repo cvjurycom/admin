@@ -17,6 +17,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { Category } from "@/lib/categories"
 import type { Tag } from "@/lib/tags"
+import type { AuthorUser } from "@/lib/users"
+
+function fullNameOf(user: AuthorUser) {
+  return `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+}
+
+const NO_REVIEWER = "none"
 
 type PublishStatus = "draft" | "schedule" | "publish"
 
@@ -40,6 +47,12 @@ type PublishingSidebarProps = {
   onRemoveTag: (tag: string) => void
   featuredImageUrl: string
   onFeaturedImageChange: (url: string) => void
+  reviewers: AuthorUser[]
+  isLoadingReviewers: boolean
+  reviewerId: string
+  onReviewerIdChange: (value: string) => void
+  audienceNote: string
+  onAudienceNoteChange: (value: string) => void
 }
 
 const DEFAULT_TAG_COLOR = "#E97451"
@@ -64,6 +77,12 @@ function PublishingSidebar({
   onRemoveTag,
   featuredImageUrl,
   onFeaturedImageChange,
+  reviewers,
+  isLoadingReviewers,
+  reviewerId,
+  onReviewerIdChange,
+  audienceNote,
+  onAudienceNoteChange,
 }: PublishingSidebarProps) {
   const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] =
     useState(false)
@@ -368,6 +387,51 @@ function PublishingSidebar({
             </SelectContent>
           </Select>
         )}
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Reviewer
+        </Label>
+        {isLoadingReviewers ? (
+          <Skeleton className="h-10! w-full rounded-[10px]" />
+        ) : (
+          <Select
+            value={reviewerId || NO_REVIEWER}
+            onValueChange={onReviewerIdChange}
+          >
+            <SelectTrigger className="h-10! w-full rounded-[10px] border border-[#E8E8EC] bg-white">
+              <SelectValue placeholder="No reviewer" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NO_REVIEWER}>No reviewer</SelectItem>
+              {reviewers.map((reviewer) => (
+                <SelectItem key={reviewer._id} value={reviewer._id ?? ""}>
+                  {fullNameOf(reviewer)}
+                  {reviewer.title ? ` — ${reviewer.title}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        {!isLoadingReviewers && reviewers.length === 0 && (
+          <p className="mt-1.5 text-xs text-[#8C8C8C]">
+            No reviewer accounts yet — add one on the Authors page with type
+            "Reviewer".
+          </p>
+        )}
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Audience Note
+        </Label>
+        <Input
+          value={audienceNote}
+          onChange={(event) => onAudienceNoteChange(event.target.value)}
+          placeholder="Primarily for a US resume audience"
+          className="h-10 rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
       </div>
     </div>
   )

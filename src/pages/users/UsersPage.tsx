@@ -54,6 +54,8 @@ import {
   type AuthorUser,
 } from "@/lib/users"
 
+type SelectableUserType = "author" | "reviewer"
+
 function fullName(user: AuthorUser) {
   return `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
 }
@@ -62,6 +64,17 @@ function initialsFor(user: AuthorUser) {
   return (
     (user.firstName?.[0] ?? "") + (user.lastName?.[0] ?? "")
   ).toUpperCase() || "?"
+}
+
+const USER_TYPE_BADGES: Record<string, { label: string; className: string }> =
+  {
+    admin: { label: "Admin", className: "bg-[#F3E8FF] text-[#7C3AED]" },
+    author: { label: "Author", className: "bg-[#FDECE3] text-[#E97451]" },
+    reviewer: { label: "Reviewer", className: "bg-[#EAF2FE] text-[#2563EB]" },
+  }
+
+function userTypeBadge(userType?: string) {
+  return USER_TYPE_BADGES[userType ?? "author"] ?? USER_TYPE_BADGES.author
 }
 
 function formatDate(dateString?: string) {
@@ -84,6 +97,7 @@ function UsersPage() {
   const [editingUser, setEditingUser] = useState<AuthorUser | null>(null)
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
+  const [userType, setUserType] = useState<SelectableUserType>("author")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [title, setTitle] = useState("")
@@ -147,6 +161,7 @@ function UsersPage() {
     setEditingUser(null)
     setFirstName("")
     setLastName("")
+    setUserType("author")
     setEmail("")
     setPassword("")
     setTitle("")
@@ -469,6 +484,26 @@ function UsersPage() {
                     className="h-10 rounded-lg border border-[#E8E8EC] bg-[#F7F8FA]"
                   />
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-[#161616]">
+                  User Type
+                </Label>
+                <Select
+                  value={userType}
+                  onValueChange={(value) =>
+                    setUserType(value as SelectableUserType)
+                  }
+                >
+                  <SelectTrigger className="h-10 w-full rounded-lg border border-[#E8E8EC] bg-[#F7F8FA]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="author">Author</SelectItem>
+                    <SelectItem value="reviewer">Reviewer</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -809,6 +844,9 @@ function UsersPage() {
                   Author
                 </TableHead>
                 <TableHead className="text-xs font-semibold tracking-wide text-[#8C8C8C] uppercase">
+                  Type
+                </TableHead>
+                <TableHead className="text-xs font-semibold tracking-wide text-[#8C8C8C] uppercase">
                   Status
                 </TableHead>
                 <TableHead className="text-xs font-semibold tracking-wide text-[#8C8C8C] uppercase">
@@ -832,6 +870,9 @@ function UsersPage() {
                           <Skeleton className="h-3 w-40" />
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-5 w-16 rounded-full" />
                     </TableCell>
                     <TableCell>
                       <Skeleton className="h-5 w-16 rounded-full" />
@@ -870,6 +911,11 @@ function UsersPage() {
                           </p>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={userTypeBadge(user.__t).className}>
+                        {userTypeBadge(user.__t).label}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -924,7 +970,7 @@ function UsersPage() {
               {!isLoading && filteredUsers.length === 0 && (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={6}
                     className="py-10 text-center text-sm text-[#8C8C8C]"
                   >
                     No authors match your search.

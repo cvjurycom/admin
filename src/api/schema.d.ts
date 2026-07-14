@@ -2238,7 +2238,7 @@ export interface components {
             version?: string;
         };
         /** @enum {string} */
-        UserType: "admin" | "author";
+        UserType: "admin" | "author" | "reviewer";
         Position: {
             title?: string;
             order?: number;
