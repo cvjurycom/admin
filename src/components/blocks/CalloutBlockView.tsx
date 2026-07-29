@@ -1,4 +1,4 @@
-import { Check } from "lucide-react"
+import { BadgeCheck } from "lucide-react"
 
 import type { CalloutBlock } from "@/lib/blocks/types"
 
@@ -8,19 +8,19 @@ function CalloutBlockView({ block }: { block: CalloutBlock }) {
     return null
   }
   return (
-    <div className="not-prose my-6 rounded-xl border border-[#F3D9C7] bg-[#FDF3EC] p-5">
+    <div className="not-prose my-6 rounded-xl border border-[#E8E8EC] bg-white p-6">
       {block.title && (
-        <p className="text-sm font-semibold tracking-wide text-[#E97451] uppercase">
+        <p className="mb-4 text-xl font-bold text-[#232326]">
           {block.title}
         </p>
       )}
-      <ul className="mt-3 flex flex-col gap-2">
+      <ul className="flex flex-col gap-3">
         {items.map((item, index) => (
           <li
             key={index}
-            className="flex items-start gap-2 text-sm text-[#4A4A4A]"
+            className="flex items-start gap-3 text-base text-[#5F5F66]"
           >
-            <Check className="mt-0.5 size-4 shrink-0 text-[#E97451]" />
+            <BadgeCheck className="mt-0.5 size-4 shrink-0 text-[#E97451]" />
             <span>{item}</span>
           </li>
         ))}

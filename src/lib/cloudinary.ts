@@ -70,5 +70,22 @@ function cloudinaryThumbnail(url: string, size = 400): string {
   return `${url.slice(0, insertAt)}c_fill,g_auto,w_${size},h_${size}/${url.slice(insertAt)}`
 }
 
-export { cloudinaryThumbnail, uploadImageToCloudinary }
+/**
+ * Strips the photo's background (AI background-removal add-on) and then
+ * face-crops it, as two chained transform steps — combining them into a
+ * single step silently skips the background removal. Author photos are
+ * often shot against a busy or solid-color backdrop that clashes with the
+ * avatar ring; this keeps only the person.
+ */
+function cloudinaryAvatar(url: string, size = 400): string {
+  const marker = "/upload/"
+  const index = url.indexOf(marker)
+  if (index === -1) {
+    return url
+  }
+  const insertAt = index + marker.length
+  return `${url.slice(0, insertAt)}e_background_removal/c_fill,g_face,w_${size},h_${size}/${url.slice(insertAt)}`
+}
+
+export { cloudinaryAvatar, cloudinaryThumbnail, uploadImageToCloudinary }
 export type { CloudinaryUploadResult }

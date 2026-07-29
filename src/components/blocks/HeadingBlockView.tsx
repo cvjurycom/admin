@@ -14,7 +14,9 @@ function HeadingBlockView({ block }: { block: HeadingBlock }) {
   }
   const id = slugify(block.text)
   return block.level === 2 ? (
-    <h2 id={id}>{block.text}</h2>
+    <h2 className="text-[28px] text-[#232326]" id={id}>
+      {block.text}
+    </h2>
   ) : (
     <h3 id={id}>{block.text}</h3>
   )

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { Category } from "@/lib/categories"
 import type { Tag } from "@/lib/tags"
@@ -28,6 +29,10 @@ const NO_REVIEWER = "none"
 type PublishStatus = "draft" | "schedule" | "publish"
 
 type PublishingSidebarProps = {
+  title: string
+  onTitleChange: (value: string) => void
+  excerpt: string
+  onExcerptChange: (value: string) => void
   status: PublishStatus
   onStatusChange: (status: PublishStatus) => void
   scheduleDate: string
@@ -58,6 +63,10 @@ type PublishingSidebarProps = {
 const DEFAULT_TAG_COLOR = "#E97451"
 
 function PublishingSidebar({
+  title,
+  onTitleChange,
+  excerpt,
+  onExcerptChange,
   status,
   onStatusChange,
   scheduleDate,
@@ -117,6 +126,30 @@ function PublishingSidebar({
 
   return (
     <div className="flex flex-col gap-5">
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Article Title
+        </Label>
+        <Textarea
+          value={title}
+          onChange={(event) => onTitleChange(event.target.value)}
+          placeholder="Post title..."
+          className="min-h-16 resize-none rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Subtitle
+        </Label>
+        <Textarea
+          value={excerpt}
+          onChange={(event) => onExcerptChange(event.target.value)}
+          placeholder="Write a short excerpt that summarizes this post..."
+          className="min-h-20 resize-none rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
+      </div>
+
       <div>
         <p className="mb-2 text-xs font-semibold tracking-wide text-[#9A9A9A] uppercase">
           Publishing
@@ -391,7 +424,7 @@ function PublishingSidebar({
 
       <div>
         <Label className="mb-2 text-sm font-medium text-[#161616]">
-          Reviewer
+          Reviewer Name
         </Label>
         {isLoadingReviewers ? (
           <Skeleton className="h-10! w-full rounded-[10px]" />
@@ -424,7 +457,7 @@ function PublishingSidebar({
 
       <div>
         <Label className="mb-2 text-sm font-medium text-[#161616]">
-          Audience Note
+          Audience
         </Label>
         <Input
           value={audienceNote}

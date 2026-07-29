@@ -1,16 +1,13 @@
-import { ArrowLeft, Zap } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout"
-import { PostContentEditor } from "@/components/posts/PostContentEditor"
+import { BlockPalette } from "@/components/posts/BlockPalette"
+import { PostEditorCanvas } from "@/components/posts/PostEditorCanvas"
 import { PostEditorHeader } from "@/components/posts/PostEditorHeader"
-import { PostPreviewContent } from "@/components/posts/PostPreviewContent"
-import { PostSeoEditor } from "@/components/posts/PostSeoEditor"
-import { PublishingSidebar } from "@/components/posts/PublishingSidebar"
+import { PostInspector, type InspectorTab } from "@/components/posts/PostInspector"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ApiError } from "@/lib/api-client"
 import {
   createBlog,
@@ -23,8 +20,14 @@ import { listTags, type Tag } from "@/lib/tags"
 import { listUsers, type AuthorUser } from "@/lib/users"
 import { getStoredUser } from "@/lib/auth"
 import { blocksFromLegacyContent, parseContentBlocks } from "@/lib/blocks/legacy"
+import { createBlock } from "@/lib/blocks/defaults"
 import { renderBlocksToHtml } from "@/lib/blocks/render-html"
-import type { Block } from "@/lib/blocks/types"
+import type { Block, BlockType } from "@/lib/blocks/types"
+import {
+  ATS_TEMPLATE_EXCERPT,
+  ATS_TEMPLATE_TITLE,
+  createAtsGuideTemplateBlocks,
+} from "@/lib/blocks/atsTemplate"
 
 type PublishStatus = "draft" | "schedule" | "publish"
 type ViewMode = "edit" | "preview"
@@ -43,29 +46,15 @@ const apiToStatus: Record<string, PublishStatus> = {
 
 function PostEditorSkeleton() {
   return (
-    <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[1fr_320px]">
+    <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[220px_1fr_320px]">
+      <Skeleton className="hidden h-96 rounded-xl xl:block" />
       <div className="flex flex-col gap-4">
-        <Skeleton className="h-10 w-40 rounded-lg" />
-
-        <div className="flex flex-col gap-4 rounded-2xl bg-[#FAFAFA] p-3 sm:p-4">
-          <div className="rounded-xl border border-[#E8E8EC] bg-white p-5">
-            <Skeleton className="h-7 w-2/3" />
-            <Skeleton className="mt-4 h-20 w-full" />
-          </div>
-          <div className="rounded-xl border border-[#E8E8EC] bg-white p-5">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="mt-4 h-64 w-full" />
-          </div>
+        <div className="rounded-2xl border border-[#E8E8EC] bg-white p-5">
+          <Skeleton className="h-7 w-2/3" />
+          <Skeleton className="mt-4 h-20 w-full" />
         </div>
       </div>
-
-      <div className="flex flex-col gap-5">
-        <Skeleton className="h-44 w-full rounded-lg" />
-        <Skeleton className="h-16 w-full rounded-lg" />
-        <Skeleton className="h-32 w-full rounded-lg" />
-        <Skeleton className="h-10 w-full rounded-lg" />
-        <Skeleton className="h-24 w-full rounded-lg" />
-      </div>
+      <Skeleton className="hidden h-96 rounded-xl xl:block" />
     </div>
   )
 }
@@ -84,13 +73,18 @@ function NewPostPage() {
   const blogId = (location.state as { blogId?: string } | null)?.blogId ?? null
 
   const [viewMode, setViewMode] = useState<ViewMode>("edit")
-  const [activeTab, setActiveTab] = useState<"content" | "seo">("content")
+  const [inspectorTab, setInspectorTab] = useState<InspectorTab>("article")
+  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [isLoadingPost, setIsLoadingPost] = useState(Boolean(blogId))
   const [isSaving, setIsSaving] = useState(false)
 
-  const [title, setTitle] = useState("")
-  const [excerpt, setExcerpt] = useState("")
-  const [blocks, setBlocks] = useState<Block[]>([])
+  const [title, setTitle] = useState(() => (blogId ? "" : ATS_TEMPLATE_TITLE))
+  const [excerpt, setExcerpt] = useState(() =>
+    blogId ? "" : ATS_TEMPLATE_EXCERPT
+  )
+  const [blocks, setBlocks] = useState<Block[]>(() =>
+    blogId ? [] : createAtsGuideTemplateBlocks()
+  )
 
   const [seoTitle, setSeoTitle] = useState("")
   const [metaDescription, setMetaDescription] = useState("")
@@ -114,6 +108,13 @@ function NewPostPage() {
   const [audienceNote, setAudienceNote] = useState("")
   const [publishedAt, setPublishedAt] = useState("")
   const [updatedAt, setUpdatedAt] = useState("")
+
+  const user = getStoredUser()
+
+  const authorName = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Admin"
+    : "Admin"
+  const authorTitle = user?.title ?? ""
 
   const selectedReviewer = reviewers.find((item) => item._id === reviewerId)
   const reviewerName = selectedReviewer
@@ -153,7 +154,6 @@ function NewPostPage() {
       })
       .finally(() => setIsLoadingReviewers(false))
   }, [])
-
 
   useEffect(() => {
     if (!blogId) {
@@ -217,16 +217,11 @@ function NewPostPage() {
 
     setIsSaving(true)
     try {
-      const user = getStoredUser()
-      const authorName = user
-        ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim()
-        : ""
-
       const payload: BlogCreateBody = {
         title: title.trim(),
         content: renderBlocksToHtml(blocks),
         contentBlocks: blocks,
-        author: authorName || "Admin",
+        author: authorName,
         slug: slugify(title),
         status: statusToApi[targetStatus],
         visibility: "public",
@@ -234,7 +229,6 @@ function NewPostPage() {
         categories: categoryId ? [categoryId] : [],
         excerpt,
         featuredImage: featuredImageUrl,
-        reviewerId,
         audienceNote,
         metaTitle: seoTitle,
         metaDescription,
@@ -275,58 +269,36 @@ function NewPostPage() {
     performSave("schedule", `${scheduleDate}T${scheduleTime}:00`)
   }
 
-  const user = getStoredUser()
-  const previewAuthorName = user
-    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "Admin"
-    : "Admin"
+  const handleAddBlock = (type: BlockType) => {
+    const newBlock = createBlock(type)
+    setBlocks((prev) => [...prev, newBlock])
+    setSelectedBlockId(newBlock.id)
+    setInspectorTab("element")
+  }
+
+  const handleSelectBlock = (id: string | null) => {
+    setSelectedBlockId(id)
+    if (id) {
+      setInspectorTab("element")
+    }
+  }
+
+  const handleSelectedBlockChange = (next: Block) => {
+    setBlocks((prev) => prev.map((block) => (block.id === next.id ? next : block)))
+  }
+
+  const handleRemoveSelectedBlock = () => {
+    if (!selectedBlockId) {
+      return
+    }
+    setBlocks((prev) => prev.filter((block) => block.id !== selectedBlockId))
+    setSelectedBlockId(null)
+  }
+
+  const selectedBlock = blocks.find((block) => block.id === selectedBlockId) ?? null
+
   const previewCategoryName =
     categories.find((item) => item._id === categoryId)?.name ?? ""
-
-  if (viewMode === "preview") {
-    return (
-      <DashboardLayout>
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-4 border-b border-[#E8E8EC] pb-4 sm:flex-row sm:items-center sm:justify-between">
-            <button
-              type="button"
-              onClick={() => setViewMode("edit")}
-              className="flex items-center gap-1.5 text-sm font-medium text-[#4A4A4A] hover:text-[#161616]"
-            >
-              <ArrowLeft className="size-4" />
-              Back to Editor
-            </button>
-            <button
-              type="button"
-              onClick={() => performSave("publish")}
-              disabled={isSaving}
-              className="flex h-9 items-center gap-1.5 rounded-lg bg-[#E97451] px-3 text-sm font-semibold text-white hover:bg-[#E0552A] disabled:opacity-50"
-            >
-              <Zap className="size-4" />
-              {isSaving ? "Saving…" : "Publish"}
-            </button>
-          </div>
-
-          <div className="mx-auto w-full max-w-3xl">
-            <PostPreviewContent
-              title={title}
-              excerpt={excerpt}
-              blocks={blocks}
-              tags={tags}
-              categoryName={previewCategoryName}
-              authorName={previewAuthorName}
-              authorTitle={user?.title ?? ""}
-              featuredImageUrl={featuredImageUrl}
-              reviewerName={reviewerName}
-              reviewerTitle={reviewerTitle}
-              audienceNote={audienceNote}
-              publishedAt={publishedAt}
-              updatedAt={updatedAt}
-            />
-          </div>
-        </div>
-      </DashboardLayout>
-    )
-  }
 
   return (
     <DashboardLayout>
@@ -334,94 +306,108 @@ function NewPostPage() {
         <PostEditorHeader
           isEditing={Boolean(blogId)}
           isSaving={isSaving}
-          onPreview={() => setViewMode("preview")}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
           onSaveDraft={() => performSave("draft")}
           onPublish={() => performSave("publish")}
         />
 
         {isLoadingPost ? (
           <PostEditorSkeleton />
+        ) : viewMode === "preview" ? (
+          <PostEditorCanvas
+            isPreview
+            title={title}
+            excerpt={excerpt}
+            blocks={blocks}
+            onBlocksChange={setBlocks}
+            selectedBlockId={selectedBlockId}
+            onSelectBlock={handleSelectBlock}
+            tags={tags}
+            categoryName={previewCategoryName}
+            authorName={authorName}
+            authorTitle={authorTitle}
+            featuredImageUrl={featuredImageUrl}
+            reviewerName={reviewerName}
+            reviewerTitle={reviewerTitle}
+            audienceNote={audienceNote}
+            publishedAt={publishedAt}
+            updatedAt={updatedAt}
+          />
         ) : (
-          <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[1fr_320px]">
-            <div className="flex flex-col gap-4">
-              <Tabs
-                value={activeTab}
-                onValueChange={(value) =>
-                  setActiveTab(value as "content" | "seo")
-                }
-              >
-                <TabsList className="h-11! w-fit rounded-[16px] border border-[#E8E8EC] bg-white p-1">
-                  <TabsTrigger
-                    value="content"
-                    className="rounded-[12px] px-4 text-[#6B6B6B] data-active:bg-[#E97451] data-active:text-white data-active:shadow-none"
-                  >
-                    Content
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="seo"
-                    className="rounded-[12px] px-4 text-[#6B6B6B] data-active:bg-[#E97451] data-active:text-white data-active:shadow-none"
-                  >
-                    SEO
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
+          <div className="grid grid-cols-1 gap-6 xl:h-[calc(100vh-7rem)] xl:grid-cols-[220px_1fr_320px]">
+            <aside className="overflow-hidden xl:h-full">
+              <BlockPalette onAdd={handleAddBlock} />
+            </aside>
 
-              {activeTab === "content" ? (
-                <PostContentEditor
-                  title={title}
-                  onTitleChange={setTitle}
-                  excerpt={excerpt}
-                  onExcerptChange={setExcerpt}
-                  blocks={blocks}
-                  onBlocksChange={setBlocks}
-                />
-              ) : (
-                <PostSeoEditor
-                  seoTitle={seoTitle}
-                  onSeoTitleChange={setSeoTitle}
-                  metaDescription={metaDescription}
-                  onMetaDescriptionChange={setMetaDescription}
-                  canonicalUrl={canonicalUrl}
-                  onCanonicalUrlChange={setCanonicalUrl}
-                />
-              )}
+            <div className="xl:h-full xl:overflow-y-auto">
+              <PostEditorCanvas
+                isPreview={false}
+                title={title}
+                excerpt={excerpt}
+                blocks={blocks}
+                onBlocksChange={setBlocks}
+                selectedBlockId={selectedBlockId}
+                onSelectBlock={handleSelectBlock}
+                tags={tags}
+                categoryName={previewCategoryName}
+                authorName={authorName}
+                authorTitle={authorTitle}
+                featuredImageUrl={featuredImageUrl}
+                reviewerName={reviewerName}
+                reviewerTitle={reviewerTitle}
+                audienceNote={audienceNote}
+                publishedAt={publishedAt}
+                updatedAt={updatedAt}
+              />
             </div>
 
-            <PublishingSidebar
-              status={status}
-              onStatusChange={setStatus}
-              scheduleDate={scheduleDate}
-              onScheduleDateChange={setScheduleDate}
-              scheduleTime={scheduleTime}
-              onScheduleTimeChange={setScheduleTime}
-              onConfirmSchedule={handleConfirmSchedule}
-              onPublishNow={() => performSave("publish")}
-              categories={categories}
-              isLoadingCategories={isLoadingCategories}
-              categoryId={categoryId}
-              onCategoryChange={setCategoryId}
-              tags={tags}
-              availableTags={availableTags}
-              isLoadingTags={isLoadingTags}
-              onAddTag={(tag) =>
-                setTags((current) =>
-                  current.includes(tag) ? current : [...current, tag]
-                )
-              }
-              onRemoveTag={(tag) =>
-                setTags((current) => current.filter((item) => item !== tag))
-              }
-              featuredImageUrl={featuredImageUrl}
-              onFeaturedImageChange={setFeaturedImageUrl}
-              reviewers={reviewers}
-              isLoadingReviewers={isLoadingReviewers}
-              reviewerId={reviewerId}
-              onReviewerIdChange={(value) =>
-                setReviewerId(value === "none" ? "" : value)
-              }
-              audienceNote={audienceNote}
-              onAudienceNoteChange={setAudienceNote}
-            />
+            <aside className="overflow-hidden xl:h-full">
+              <PostInspector
+                activeTab={inspectorTab}
+                onActiveTabChange={setInspectorTab}
+                selectedBlock={selectedBlock}
+                onSelectedBlockChange={handleSelectedBlockChange}
+                onRemoveSelectedBlock={handleRemoveSelectedBlock}
+                blockCount={blocks.length}
+                publishingProps={{
+                  title,
+                  onTitleChange: setTitle,
+                  excerpt,
+                  onExcerptChange: setExcerpt,
+                  status,
+                  onStatusChange: setStatus,
+                  scheduleDate,
+                  onScheduleDateChange: setScheduleDate,
+                  scheduleTime,
+                  onScheduleTimeChange: setScheduleTime,
+                  onConfirmSchedule: handleConfirmSchedule,
+                  onPublishNow: () => performSave("publish"),
+                  categories,
+                  isLoadingCategories,
+                  categoryId,
+                  onCategoryChange: setCategoryId,
+                  tags,
+                  availableTags,
+                  isLoadingTags,
+                  onAddTag: (tag) =>
+                    setTags((current) =>
+                      current.includes(tag) ? current : [...current, tag]
+                    ),
+                  onRemoveTag: (tag) =>
+                    setTags((current) => current.filter((item) => item !== tag)),
+                  featuredImageUrl,
+                  onFeaturedImageChange: setFeaturedImageUrl,
+                  reviewers,
+                  isLoadingReviewers,
+                  reviewerId,
+                  onReviewerIdChange: (value) =>
+                    setReviewerId(value === "none" ? "" : value),
+                  audienceNote,
+                  onAudienceNoteChange: setAudienceNote,
+                }}
+              />
+            </aside>
           </div>
         )}
       </div>
