@@ -12,6 +12,7 @@ import { ApiError } from "@/lib/api-client"
 import {
   createBlog,
   getBlog,
+  getReviewerId,
   updateBlog,
   type BlogCreateBody,
 } from "@/lib/blogs"
@@ -180,7 +181,7 @@ function NewPostPage() {
         setMetaDescription(blog.metaDescription ?? "")
         setCanonicalUrl(blog.canonicalUrl ?? "")
         setFeaturedImageUrl(blog.featuredImage ?? "")
-        setReviewerId(blog.reviewerId ?? "")
+        setReviewerId(getReviewerId(blog))
         setAudienceNote(blog.audienceNote ?? "")
         setPublishedAt(blog.publishedAt ?? blog.createdAt ?? "")
         setUpdatedAt(blog.updatedAt ?? "")

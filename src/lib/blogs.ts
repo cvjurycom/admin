@@ -16,14 +16,6 @@ type BlogSeoFields = {
    * missing. See src/lib/blocks/legacy.ts.
    */
   contentBlocks?: Block[]
-  /**
-   * References a User whose __t is "reviewer" (see src/lib/users.ts). Sent
-   * best-effort — not in the OpenAPI spec. `reviewerName`/`reviewerTitle`
-   * free-text fields were tried first but the backend hard-rejects unknown
-   * fields on this endpoint ("X is not allowed"), so this only works if the
-   * backend recognizes `reviewerId` specifically.
-   */
-  reviewerId?: string
   audienceNote?: string
   excerpt?: string
   featuredImage?: string
@@ -48,6 +40,19 @@ type BlogSeoFields = {
 type Blog = components["schemas"]["Blog"] & BlogSeoFields
 type BlogCreateBody = components["schemas"]["BlogCreateBody"] & BlogSeoFields
 type BlogUpdateBody = components["schemas"]["BlogUpdateBody"] & BlogSeoFields
+
+/**
+ * `Blog.reviewerId` can come back as a plain id string or, when the backend
+ * populates it, an expanded `{ _id, firstName, lastName, ... }` object —
+ * this normalizes either shape down to the id the reviewer <select> needs.
+ */
+function getReviewerId(blog: Blog): string {
+  const value = blog.reviewerId
+  if (!value) {
+    return ""
+  }
+  return typeof value === "string" ? value : (value._id ?? "")
+}
 
 async function listAllBlogs(): Promise<Blog[]> {
   return fetchAllPages<Blog>("/v1/admin/blogs")
@@ -102,5 +107,13 @@ async function deleteBlog(blogId: string): Promise<void> {
   await apiFetch(`/v1/admin/blogs/${blogId}`, { method: "DELETE" })
 }
 
-export { createBlog, deleteBlog, getBlog, listAllBlogs, listBlogs, updateBlog }
+export {
+  createBlog,
+  deleteBlog,
+  getBlog,
+  getReviewerId,
+  listAllBlogs,
+  listBlogs,
+  updateBlog,
+}
 export type { Blog, BlogCreateBody, BlogUpdateBody }
