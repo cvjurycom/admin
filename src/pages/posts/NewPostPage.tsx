@@ -304,14 +304,22 @@ function NewPostPage() {
   return (
     <DashboardLayout>
       <div className="flex flex-col gap-6">
-        <PostEditorHeader
-          isEditing={Boolean(blogId)}
-          isSaving={isSaving}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          onSaveDraft={() => performSave("draft")}
-          onPublish={() => performSave("publish")}
-        />
+        <div
+          className={
+            viewMode === "preview"
+              ? "sticky top-0 z-20 bg-white pt-1"
+              : undefined
+          }
+        >
+          <PostEditorHeader
+            isEditing={Boolean(blogId)}
+            isSaving={isSaving}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onSaveDraft={() => performSave("draft")}
+            onPublish={() => performSave("publish")}
+          />
+        </div>
 
         {isLoadingPost ? (
           <PostEditorSkeleton />

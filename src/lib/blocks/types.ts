@@ -29,6 +29,7 @@ import {
   Sparkles,
   Table2,
   Target,
+  TrendingUp,
   Trophy,
   User,
   Workflow,
@@ -87,8 +88,8 @@ export type DosDontsBlock = BlockBase & {
 }
 export type TableBlock = BlockBase & {
   type: "table"
-  headers: [string, string]
-  rows: [string, string][]
+  headers: string[]
+  rows: string[][]
 }
 export type FeatureGridBlock = BlockBase & {
   type: "featureGrid"
@@ -201,6 +202,10 @@ export type AchievementCardsBlock = BlockBase & {
   strongLabel: string
   pairs: { weak: string; strong: string }[]
 }
+export type AchievementLevelsBlock = BlockBase & {
+  type: "achievementLevels"
+  items: { label: string; body: string; tone: "weak" | "strong" }[]
+}
 export type InfographicStepsBlock = BlockBase & {
   type: "infographicSteps"
   eyebrow: string
@@ -293,6 +298,7 @@ export type Block =
   | GuidanceNoteBlock
   | CvTemplateShowcaseBlock
   | AchievementCardsBlock
+  | AchievementLevelsBlock
   | InfographicStepsBlock
   | NumberedItemBlock
   | ProofCardsBlock
@@ -333,6 +339,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   guidanceNote: "Guidance tip callout",
   cvTemplateShowcase: "CV template showcase",
   achievementCards: "Paired achievement cards",
+  achievementLevels: "Achievement Levels",
   infographicSteps: "ATS resume workflow",
   numberedItem: "Single numbered item",
   proofCards: "Proof cards",
@@ -372,6 +379,7 @@ export const BLOCK_ICONS: Record<BlockType, LucideIcon> = {
   guidanceNote: AlertTriangle,
   cvTemplateShowcase: LayoutTemplate,
   achievementCards: Trophy,
+  achievementLevels: TrendingUp,
   infographicSteps: GitBranch,
   numberedItem: Hash,
   proofCards: Award,
@@ -404,7 +412,12 @@ export const BLOCK_CATEGORIES: { label: string; types: BlockType[] }[] = [
   },
   {
     label: "Comparisons",
-    types: ["beforeAfter", "achievementCards", "editorialTip"],
+    types: [
+      "beforeAfter",
+      "achievementCards",
+      "achievementLevels",
+      "editorialTip",
+    ],
   },
   {
     label: "Tables",

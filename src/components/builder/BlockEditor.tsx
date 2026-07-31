@@ -1,4 +1,5 @@
 import { AchievementCardsBlockEditor } from "@/components/builder/blocks/AchievementCardsBlockEditor"
+import { AchievementLevelsBlockEditor } from "@/components/builder/blocks/AchievementLevelsBlockEditor"
 import { AtsMatchMapBlockEditor } from "@/components/builder/blocks/AtsMatchMapBlockEditor"
 import { AtsScoreCardBlockEditor } from "@/components/builder/blocks/AtsScoreCardBlockEditor"
 import { AtsVisualFlowBlockEditor } from "@/components/builder/blocks/AtsVisualFlowBlockEditor"
@@ -100,6 +101,8 @@ function BlockEditor({
       return <CvTemplateShowcaseBlockEditor block={block} onChange={onChange} />
     case "achievementCards":
       return <AchievementCardsBlockEditor block={block} onChange={onChange} />
+    case "achievementLevels":
+      return <AchievementLevelsBlockEditor block={block} onChange={onChange} />
     case "infographicSteps":
       return <InfographicStepsBlockEditor block={block} onChange={onChange} />
     case "numberedItem":

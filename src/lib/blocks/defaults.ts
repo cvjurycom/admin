@@ -164,6 +164,28 @@ export function createBlock(type: BlockType): Block {
         strongLabel: "Strong Resume Achievement",
         pairs: [{ weak: "", strong: "" }],
       }
+    case "achievementLevels":
+      return {
+        id,
+        type,
+        items: [
+          {
+            label: "Weak",
+            body: "Responsible for answering customer complaints.",
+            tone: "weak",
+          },
+          {
+            label: "Stronger",
+            body: "Resolved customer complaints across phone and email, recorded agreed actions, and kept urgent cases moving to the right team.",
+            tone: "strong",
+          },
+          {
+            label: "Stronger with a verified result",
+            body: "Resolved 25 to 35 weekly complaints across phone and email, cutting repeat contacts after introducing a shared follow-up log.",
+            tone: "strong",
+          },
+        ],
+      }
     case "infographicSteps":
       return {
         id,

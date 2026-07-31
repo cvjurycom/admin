@@ -48,9 +48,10 @@ function BeforeAfterBlockView({ block }: { block: BeforeAfterBlock }) {
             <span className="size-1.5 rounded-full bg-[#D94A4A]" />
             Before
           </span>
-          <p className="mb-2 text-base font-semibold text-[#232326]">
-            {block.beforeText}
-          </p>
+          <div
+            className="mb-2 text-base font-normal text-[#232326] [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:m-0 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-5"
+            dangerouslySetInnerHTML={{ __html: block.beforeText }}
+          />
           {block.beforeNote && (
             <p className="text-[13px] text-[#5F5F66]">{block.beforeNote}</p>
           )}
@@ -65,9 +66,10 @@ function BeforeAfterBlockView({ block }: { block: BeforeAfterBlock }) {
             <span className="size-1.5 rounded-full bg-[#2F9E8F]" />
             After
           </span>
-          <p className="mb-3 text-[16px] font-semibold text-[#232326]">
-            {block.afterText}
-          </p>
+          <div
+            className="mb-3 text-[16px] font-normal text-[#232326] [&_ol]:my-1 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:m-0 [&_ul]:my-1 [&_ul]:list-disc [&_ul]:pl-5"
+            dangerouslySetInnerHTML={{ __html: block.afterText }}
+          />
           {tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {tags.map((tag, index) => (

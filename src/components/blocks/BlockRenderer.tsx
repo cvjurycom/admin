@@ -1,4 +1,5 @@
 import { AchievementCardsBlockView } from "@/components/blocks/AchievementCardsBlockView"
+import { AchievementLevelsBlockView } from "@/components/blocks/AchievementLevelsBlockView"
 import { AtsMatchMapBlockView } from "@/components/blocks/AtsMatchMapBlockView"
 import { AtsScoreCardBlockView } from "@/components/blocks/AtsScoreCardBlockView"
 import { AtsVisualFlowBlockView } from "@/components/blocks/AtsVisualFlowBlockView"
@@ -94,6 +95,8 @@ function BlockRenderer({ block }: { block: Block }) {
       return <CvTemplateShowcaseBlockView block={block} />
     case "achievementCards":
       return <AchievementCardsBlockView block={block} />
+    case "achievementLevels":
+      return <AchievementLevelsBlockView block={block} />
     case "infographicSteps":
       return <InfographicStepsBlockView block={block} />
     case "numberedItem":

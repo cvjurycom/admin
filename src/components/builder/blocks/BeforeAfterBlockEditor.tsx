@@ -1,7 +1,6 @@
-import { StringListEditor } from "@/components/builder/inputs"
+import { InlineRichTextInput, StringListEditor } from "@/components/builder/inputs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import type { BeforeAfterBlock } from "@/lib/blocks/types"
 
 function BeforeAfterBlockEditor({
@@ -27,12 +26,10 @@ function BeforeAfterBlockEditor({
       />
       <div className="flex flex-col gap-2">
         <Label>Before</Label>
-        <Textarea
+        <InlineRichTextInput
           value={block.beforeText}
           placeholder="Before text"
-          onChange={(event) =>
-            onChange({ ...block, beforeText: event.target.value })
-          }
+          onChange={(beforeText) => onChange({ ...block, beforeText })}
         />
         <Input
           value={block.beforeNote}
@@ -44,12 +41,10 @@ function BeforeAfterBlockEditor({
       </div>
       <div className="flex flex-col gap-2">
         <Label>After</Label>
-        <Textarea
+        <InlineRichTextInput
           value={block.afterText}
           placeholder="After text"
-          onChange={(event) =>
-            onChange({ ...block, afterText: event.target.value })
-          }
+          onChange={(afterText) => onChange({ ...block, afterText })}
         />
         <StringListEditor
           items={block.afterTags}

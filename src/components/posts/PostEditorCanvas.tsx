@@ -75,7 +75,7 @@ function ArticleToc({
   onSelect: (index: number, id: string) => void
 }) {
   return (
-    <div className="w-44 shrink-0 pt-1 pr-6">
+    <div className="hidden w-44 shrink-0 pt-1 pr-6 lg:block">
       <p className="mb-3 text-[10px] font-bold tracking-widest text-[#B0B0B0] uppercase">
         In this article
       </p>
@@ -358,7 +358,9 @@ function PostEditorCanvas({
           </div>
         )}
 
-        <div className={tocItems.length > 0 ? "flex items-start gap-0" : ""}>
+        <div
+          className={tocItems.length > 0 ? "lg:flex lg:items-start lg:gap-0" : ""}
+        >
           {tocItems.length > 0 && (
             <ArticleToc
               items={tocItems}

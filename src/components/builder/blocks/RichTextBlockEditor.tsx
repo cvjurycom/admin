@@ -57,7 +57,7 @@ function RichTextBlockEditor({
     editorProps: {
       attributes: {
         class:
-          "prose prose-sm max-w-none min-h-[160px] px-4 py-3 focus:outline-none [&_p]:my-2 [&_ol]:my-2 [&_ul]:my-2",
+          "prose prose-sm max-w-none min-h-[160px] px-4 py-3 focus:outline-none [&_p]:my-2 [&_ol]:my-2 [&_ul]:my-2 [&_a]:text-[#E97451] [&_a]:underline [&_a]:decoration-[#E97451]",
       },
     },
   })
