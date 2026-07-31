@@ -2238,7 +2238,7 @@ export interface components {
             version?: string;
         };
         /** @enum {string} */
-        UserType: "admin" | "author";
+        UserType: "admin" | "author" | "reviewer";
         Position: {
             title?: string;
             order?: number;
@@ -2404,6 +2404,13 @@ export interface components {
             excerpt?: string;
             author?: string;
             authorId?: components["schemas"]["ObjectId"];
+            reviewerId?: (components["schemas"]["ObjectId"] | {
+                _id?: components["schemas"]["ObjectId"];
+                firstName?: string;
+                lastName?: string;
+                profileImage?: string;
+                title?: string;
+            } | null) | null;
             status?: components["schemas"]["BlogStatus"];
             /** @enum {string} */
             visibility?: "public" | "private";
@@ -2424,6 +2431,7 @@ export interface components {
             content: string;
             slug?: string;
             author: string;
+            reviewerId?: components["schemas"]["ObjectId"];
             status?: components["schemas"]["BlogStatus"];
             /**
              * @default public
@@ -2442,6 +2450,7 @@ export interface components {
             excerpt?: string;
             /** Format: uri */
             featuredImage?: string;
+            reviewerId?: components["schemas"]["ObjectId"];
             status?: components["schemas"]["BlogStatus"];
             /**
              * @default public
@@ -2458,6 +2467,7 @@ export interface components {
             content?: string;
             slug?: string;
             author?: string;
+            reviewerId?: components["schemas"]["ObjectId"];
             status?: components["schemas"]["BlogStatus"];
             /** @enum {string} */
             visibility?: "public" | "private";

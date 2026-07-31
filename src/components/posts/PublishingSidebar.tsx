@@ -14,13 +14,25 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { Category } from "@/lib/categories"
 import type { Tag } from "@/lib/tags"
+import type { AuthorUser } from "@/lib/users"
+
+function fullNameOf(user: AuthorUser) {
+  return `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "—"
+}
+
+const NO_REVIEWER = "none"
 
 type PublishStatus = "draft" | "schedule" | "publish"
 
 type PublishingSidebarProps = {
+  title: string
+  onTitleChange: (value: string) => void
+  excerpt: string
+  onExcerptChange: (value: string) => void
   status: PublishStatus
   onStatusChange: (status: PublishStatus) => void
   scheduleDate: string
@@ -40,11 +52,21 @@ type PublishingSidebarProps = {
   onRemoveTag: (tag: string) => void
   featuredImageUrl: string
   onFeaturedImageChange: (url: string) => void
+  reviewers: AuthorUser[]
+  isLoadingReviewers: boolean
+  reviewerId: string
+  onReviewerIdChange: (value: string) => void
+  audienceNote: string
+  onAudienceNoteChange: (value: string) => void
 }
 
 const DEFAULT_TAG_COLOR = "#E97451"
 
 function PublishingSidebar({
+  title,
+  onTitleChange,
+  excerpt,
+  onExcerptChange,
   status,
   onStatusChange,
   scheduleDate,
@@ -64,6 +86,12 @@ function PublishingSidebar({
   onRemoveTag,
   featuredImageUrl,
   onFeaturedImageChange,
+  reviewers,
+  isLoadingReviewers,
+  reviewerId,
+  onReviewerIdChange,
+  audienceNote,
+  onAudienceNoteChange,
 }: PublishingSidebarProps) {
   const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] =
     useState(false)
@@ -98,6 +126,30 @@ function PublishingSidebar({
 
   return (
     <div className="flex flex-col gap-5">
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Article Title
+        </Label>
+        <Textarea
+          value={title}
+          onChange={(event) => onTitleChange(event.target.value)}
+          placeholder="Post title..."
+          className="min-h-16 resize-none rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Subtitle
+        </Label>
+        <Textarea
+          value={excerpt}
+          onChange={(event) => onExcerptChange(event.target.value)}
+          placeholder="Write a short excerpt that summarizes this post..."
+          className="min-h-20 resize-none rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
+      </div>
+
       <div>
         <p className="mb-2 text-xs font-semibold tracking-wide text-[#9A9A9A] uppercase">
           Publishing
@@ -368,6 +420,51 @@ function PublishingSidebar({
             </SelectContent>
           </Select>
         )}
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Reviewer Name
+        </Label>
+        {isLoadingReviewers ? (
+          <Skeleton className="h-10! w-full rounded-[10px]" />
+        ) : (
+          <Select
+            value={reviewerId || NO_REVIEWER}
+            onValueChange={onReviewerIdChange}
+          >
+            <SelectTrigger className="h-10! w-full rounded-[10px] border border-[#E8E8EC] bg-white">
+              <SelectValue placeholder="No reviewer" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NO_REVIEWER}>No reviewer</SelectItem>
+              {reviewers.map((reviewer) => (
+                <SelectItem key={reviewer._id} value={reviewer._id ?? ""}>
+                  {fullNameOf(reviewer)}
+                  {reviewer.title ? ` — ${reviewer.title}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+        {!isLoadingReviewers && reviewers.length === 0 && (
+          <p className="mt-1.5 text-xs text-[#8C8C8C]">
+            No reviewer accounts yet — add one on the Authors page with type
+            "Reviewer".
+          </p>
+        )}
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Audience
+        </Label>
+        <Input
+          value={audienceNote}
+          onChange={(event) => onAudienceNoteChange(event.target.value)}
+          placeholder="Primarily for a US resume audience"
+          className="h-10 rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
       </div>
     </div>
   )

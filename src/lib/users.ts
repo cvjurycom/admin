@@ -2,8 +2,21 @@ import { apiFetch, fetchAllPages } from "@/lib/api-client"
 import type { components } from "@/api/schema"
 
 type AuthorUser = components["schemas"]["User"]
-type AuthorCreateBody = components["schemas"]["AuthorCreateBody"]
-type AuthorUpdateBody = components["schemas"]["AuthorUpdateBody"]
+
+/**
+ * `__t` is the Mongoose discriminator key backing `UserType` on the read-side
+ * `User` schema, but it isn't documented on AuthorCreateBody/AuthorUpdateBody.
+ * Sent best-effort (same pattern as the undocumented Blog fields in
+ * src/lib/blogs.ts).
+ */
+type UserTypeField = {
+  __t?: components["schemas"]["UserType"]
+}
+
+type AuthorCreateBody = components["schemas"]["AuthorCreateBody"] &
+  UserTypeField
+type AuthorUpdateBody = components["schemas"]["AuthorUpdateBody"] &
+  UserTypeField
 
 async function listUsers(): Promise<AuthorUser[]> {
   return fetchAllPages<AuthorUser>("/v1/admin/authors")

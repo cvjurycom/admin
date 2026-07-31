@@ -1,10 +1,13 @@
-import { ArrowLeft, Eye, Save, Zap } from "lucide-react"
+import { ArrowLeft, Edit3, Eye, Save, Zap } from "lucide-react"
 import { Link } from "react-router-dom"
+
+type ViewMode = "edit" | "preview"
 
 type PostEditorHeaderProps = {
   isEditing: boolean
   isSaving: boolean
-  onPreview: () => void
+  viewMode: ViewMode
+  onViewModeChange: (mode: ViewMode) => void
   onSaveDraft: () => void
   onPublish: () => void
 }
@@ -12,7 +15,8 @@ type PostEditorHeaderProps = {
 function PostEditorHeader({
   isEditing,
   isSaving,
-  onPreview,
+  viewMode,
+  onViewModeChange,
   onSaveDraft,
   onPublish,
 }: PostEditorHeaderProps) {
@@ -38,6 +42,32 @@ function PostEditorHeader({
       </div>
 
       <div className="flex items-center gap-2">
+        <div className="flex items-center rounded-lg border border-[#E8E8EC] bg-[#FAFAFA] p-0.5">
+          <button
+            type="button"
+            onClick={() => onViewModeChange("edit")}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+              viewMode === "edit"
+                ? "bg-white text-[#161616] shadow-sm"
+                : "text-[#8C8C8C] hover:text-[#4A4A4A]"
+            }`}
+          >
+            <Edit3 className="size-3.5" />
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewModeChange("preview")}
+            className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
+              viewMode === "preview"
+                ? "bg-white text-[#161616] shadow-sm"
+                : "text-[#8C8C8C] hover:text-[#4A4A4A]"
+            }`}
+          >
+            <Eye className="size-3.5" />
+            Preview
+          </button>
+        </div>
         <button
           type="button"
           onClick={onSaveDraft}
@@ -46,14 +76,6 @@ function PostEditorHeader({
         >
           <Save className="size-4" />
           Save Draft
-        </button>
-        <button
-          type="button"
-          onClick={onPreview}
-          className="flex h-9 items-center gap-1.5 rounded-lg border border-[#E8E8EC] px-3 text-sm font-medium text-[#4A4A4A] hover:bg-[#F7F8FA]"
-        >
-          <Eye className="size-4" />
-          Preview
         </button>
         <button
           type="button"

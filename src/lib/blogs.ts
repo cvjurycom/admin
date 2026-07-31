@@ -1,5 +1,6 @@
 import { apiFetch, fetchAllPages } from "@/lib/api-client"
 import type { components } from "@/api/schema"
+import type { Block } from "@/lib/blocks/types"
 
 /**
  * The live API accepts and returns a much richer field set on Blog records
@@ -8,6 +9,14 @@ import type { components } from "@/api/schema"
  * SEO/OG/Twitter metadata all persist even though they're undocumented.
  */
 type BlogSeoFields = {
+  /**
+   * The block-based builder's `Block[]`, sent/returned as a real array (not
+   * a JSON string) — best-effort field, not in the OpenAPI spec. Falls back
+   * to re-wrapping `content` as a single richtext block on load if it's
+   * missing. See src/lib/blocks/legacy.ts.
+   */
+  contentBlocks?: Block[]
+  audienceNote?: string
   excerpt?: string
   featuredImage?: string
   featuredImageAlt?: string
@@ -31,6 +40,19 @@ type BlogSeoFields = {
 type Blog = components["schemas"]["Blog"] & BlogSeoFields
 type BlogCreateBody = components["schemas"]["BlogCreateBody"] & BlogSeoFields
 type BlogUpdateBody = components["schemas"]["BlogUpdateBody"] & BlogSeoFields
+
+/**
+ * `Blog.reviewerId` can come back as a plain id string or, when the backend
+ * populates it, an expanded `{ _id, firstName, lastName, ... }` object —
+ * this normalizes either shape down to the id the reviewer <select> needs.
+ */
+function getReviewerId(blog: Blog): string {
+  const value = blog.reviewerId
+  if (!value) {
+    return ""
+  }
+  return typeof value === "string" ? value : (value._id ?? "")
+}
 
 async function listAllBlogs(): Promise<Blog[]> {
   return fetchAllPages<Blog>("/v1/admin/blogs")
@@ -85,5 +107,13 @@ async function deleteBlog(blogId: string): Promise<void> {
   await apiFetch(`/v1/admin/blogs/${blogId}`, { method: "DELETE" })
 }
 
-export { createBlog, deleteBlog, getBlog, listAllBlogs, listBlogs, updateBlog }
+export {
+  createBlog,
+  deleteBlog,
+  getBlog,
+  getReviewerId,
+  listAllBlogs,
+  listBlogs,
+  updateBlog,
+}
 export type { Blog, BlogCreateBody, BlogUpdateBody }
