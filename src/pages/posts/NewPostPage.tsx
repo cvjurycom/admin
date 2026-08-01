@@ -7,6 +7,7 @@ import { BlockPalette } from "@/components/posts/BlockPalette"
 import { PostEditorCanvas } from "@/components/posts/PostEditorCanvas"
 import { PostEditorHeader } from "@/components/posts/PostEditorHeader"
 import { PostInspector, type InspectorTab } from "@/components/posts/PostInspector"
+import { PublishSlugDialog } from "@/components/posts/PublishSlugDialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ApiError } from "@/lib/api-client"
 import {
@@ -78,6 +79,8 @@ function NewPostPage() {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [isLoadingPost, setIsLoadingPost] = useState(Boolean(blogId))
   const [isSaving, setIsSaving] = useState(false)
+  const [slug, setSlug] = useState("")
+  const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false)
 
   const [title, setTitle] = useState(() => (blogId ? "" : ATS_TEMPLATE_TITLE))
   const [excerpt, setExcerpt] = useState(() =>
@@ -169,6 +172,7 @@ function NewPostPage() {
           return
         }
         setTitle(blog.title ?? "")
+        setSlug(blog.slug ?? "")
         setBlocks(
           parseContentBlocks(blog.contentBlocks) ??
             blocksFromLegacyContent(blog.content ?? "")
@@ -223,7 +227,7 @@ function NewPostPage() {
         content: renderBlocksToHtml(blocks),
         contentBlocks: blocks,
         author: authorName,
-        slug: slugify(title),
+        slug: slug.trim() || slugify(title),
         status: statusToApi[targetStatus],
         visibility: "public",
         tags,
@@ -270,6 +274,22 @@ function NewPostPage() {
     performSave("schedule", `${scheduleDate}T${scheduleTime}:00`)
   }
 
+  const handleRequestPublish = () => {
+    if (!title.trim() || blocks.length === 0) {
+      toast.error("Title and content are required.")
+      return
+    }
+    if (!slug.trim()) {
+      setSlug(slugify(title))
+    }
+    setIsPublishDialogOpen(true)
+  }
+
+  const handleConfirmPublish = () => {
+    setIsPublishDialogOpen(false)
+    performSave("publish")
+  }
+
   const handleAddBlock = (type: BlockType) => {
     const newBlock = createBlock(type)
     setBlocks((prev) => [...prev, newBlock])
@@ -302,7 +322,7 @@ function NewPostPage() {
     categories.find((item) => item._id === categoryId)?.name ?? ""
 
   return (
-    <DashboardLayout>
+    <DashboardLayout defaultSidebarOpen={false}>
       <div className="flex flex-col gap-6">
         <div
           className={
@@ -317,7 +337,7 @@ function NewPostPage() {
             viewMode={viewMode}
             onViewModeChange={setViewMode}
             onSaveDraft={() => performSave("draft")}
-            onPublish={() => performSave("publish")}
+            onPublish={handleRequestPublish}
           />
         </div>
 
@@ -391,7 +411,7 @@ function NewPostPage() {
                   scheduleTime,
                   onScheduleTimeChange: setScheduleTime,
                   onConfirmSchedule: handleConfirmSchedule,
-                  onPublishNow: () => performSave("publish"),
+                  onPublishNow: handleRequestPublish,
                   categories,
                   isLoadingCategories,
                   categoryId,
@@ -420,6 +440,15 @@ function NewPostPage() {
           </div>
         )}
       </div>
+
+      <PublishSlugDialog
+        open={isPublishDialogOpen}
+        onOpenChange={setIsPublishDialogOpen}
+        slug={slug}
+        onSlugChange={(value) => setSlug(slugify(value))}
+        onConfirm={handleConfirmPublish}
+        isPublishing={isSaving}
+      />
     </DashboardLayout>
   )
 }

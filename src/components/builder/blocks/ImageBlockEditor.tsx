@@ -1,7 +1,8 @@
-import { ImagePlus } from "lucide-react"
+import { ImagePlus, LibraryBig } from "lucide-react"
 import { useRef, useState, type ChangeEvent } from "react"
 import { toast } from "sonner"
 
+import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
@@ -16,6 +17,7 @@ function ImageBlockEditor({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false)
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -53,28 +55,62 @@ function ImageBlockEditor({
             alt={block.alt}
             className="aspect-video w-full rounded-lg object-cover"
           />
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="absolute right-2 bottom-2"
-            disabled={isUploading}
-            onClick={() => fileInputRef.current?.click()}
-          >
-            {isUploading ? "Uploading…" : "Replace image"}
-          </Button>
+          <div className="absolute right-2 bottom-2 flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={isUploading}
+              onClick={() => setIsLibraryOpen(true)}
+            >
+              <LibraryBig className="size-3.5" />
+              Library
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              disabled={isUploading}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              {isUploading ? "Uploading…" : "Replace image"}
+            </Button>
+          </div>
         </div>
       ) : (
-        <button
-          type="button"
-          disabled={isUploading}
-          onClick={() => fileInputRef.current?.click()}
-          className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[#E8E8EC] text-sm text-[#8C8C8C] hover:bg-[#FAFAFA] disabled:opacity-50"
-        >
-          <ImagePlus className="size-6" />
-          {isUploading ? "Uploading…" : "Upload an image"}
-        </button>
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            disabled={isUploading}
+            onClick={() => fileInputRef.current?.click()}
+            className="flex aspect-video w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[#E8E8EC] text-sm text-[#8C8C8C] hover:bg-[#FAFAFA] disabled:opacity-50"
+          >
+            <ImagePlus className="size-6" />
+            {isUploading ? "Uploading…" : "Upload an image"}
+          </button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-fit"
+            onClick={() => setIsLibraryOpen(true)}
+          >
+            <LibraryBig className="size-3.5" />
+            Choose from library
+          </Button>
+        </div>
       )}
+      <MediaLibraryDialog
+        open={isLibraryOpen}
+        onOpenChange={setIsLibraryOpen}
+        onSelect={(media) =>
+          onChange({
+            ...block,
+            src: media.imageUrl ?? "",
+            alt: block.alt || media.altText || "",
+          })
+        }
+      />
       <Input
         value={block.alt}
         placeholder="Alt text"
