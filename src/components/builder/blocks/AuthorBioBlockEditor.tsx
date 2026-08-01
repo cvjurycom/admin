@@ -1,8 +1,9 @@
-import { ImagePlus } from "lucide-react"
+import { ImagePlus, LibraryBig } from "lucide-react"
 import { useRef, useState, type ChangeEvent } from "react"
 import { toast } from "sonner"
 
 import { RepeatingRows, StringListEditor } from "@/components/builder/inputs"
+import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,6 +20,7 @@ function AuthorBioBlockEditor({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false)
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -88,7 +90,23 @@ function AuthorBioBlockEditor({
               ? "Replace photo"
               : "Upload photo"}
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setIsLibraryOpen(true)}
+        >
+          <LibraryBig className="size-3.5" />
+          Library
+        </Button>
       </div>
+      <MediaLibraryDialog
+        open={isLibraryOpen}
+        onOpenChange={setIsLibraryOpen}
+        onSelect={(media) =>
+          onChange({ ...block, avatarUrl: media.imageUrl ?? "" })
+        }
+      />
       <Textarea
         value={block.bio}
         placeholder="Bio"

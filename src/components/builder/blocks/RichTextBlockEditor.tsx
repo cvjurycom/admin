@@ -10,6 +10,7 @@ import {
   Code,
   Image as ImageIcon,
   Italic,
+  LibraryBig,
   Link2,
   List,
   ListOrdered,
@@ -19,6 +20,7 @@ import {
 import { useRef, useState, type ChangeEvent } from "react"
 import { toast } from "sonner"
 
+import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
 import { cn } from "@/lib/utils"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { RichTextBlock } from "@/lib/blocks/types"
@@ -40,6 +42,7 @@ function RichTextBlockEditor({
 }) {
   const imageInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -211,6 +214,23 @@ function RichTextBlockEditor({
         >
           <ImageIcon className="size-4" />
         </button>
+        <button
+          type="button"
+          aria-label="Choose image from library"
+          onClick={() => setIsLibraryOpen(true)}
+          className="flex size-8 items-center justify-center rounded-md text-[#6B6B6B] hover:bg-[#F1F1F3] hover:text-[#4A4A4A] disabled:opacity-50"
+        >
+          <LibraryBig className="size-4" />
+        </button>
+        <MediaLibraryDialog
+          open={isLibraryOpen}
+          onOpenChange={setIsLibraryOpen}
+          onSelect={(media) => {
+            if (media.imageUrl) {
+              editor?.chain().focus().setImage({ src: media.imageUrl }).run()
+            }
+          }}
+        />
         {toolbarButtons.slice(6).map((tool) => (
           <button
             key={tool.label}

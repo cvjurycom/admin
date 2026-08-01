@@ -3,9 +3,15 @@ import * as React from "react"
 import { AppSidebar } from "@/components/dashboard/AppSidebar"
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
-function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardLayout({
+  children,
+  defaultSidebarOpen = true,
+}: {
+  children: React.ReactNode
+  defaultSidebarOpen?: boolean
+}) {
   return (
-    <SidebarProvider className="bg-white">
+    <SidebarProvider className="bg-white" defaultOpen={defaultSidebarOpen}>
       <AppSidebar />
       <SidebarInset className="bg-white">
         <div className="flex items-center gap-2 border-b border-[#E8E8EC] px-4 py-3 md:hidden">

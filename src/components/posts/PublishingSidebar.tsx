@@ -1,8 +1,10 @@
-import { Globe, ImagePlus, X, Zap } from "lucide-react"
+import { Globe, ImagePlus, LibraryBig, X, Zap } from "lucide-react"
 import { useRef, useState, type ChangeEvent } from "react"
 import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
+import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -95,6 +97,7 @@ function PublishingSidebar({
 }: PublishingSidebarProps) {
   const [isUploadingFeaturedImage, setIsUploadingFeaturedImage] =
     useState(false)
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false)
   const featuredImageInputRef = useRef<HTMLInputElement>(null)
 
   const selectableTags = availableTags.filter(
@@ -333,6 +336,21 @@ function PublishingSidebar({
             </>
           )}
         </button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="mt-2 w-full"
+          onClick={() => setIsLibraryOpen(true)}
+        >
+          <LibraryBig className="size-3.5" />
+          Choose from library
+        </Button>
+        <MediaLibraryDialog
+          open={isLibraryOpen}
+          onOpenChange={setIsLibraryOpen}
+          onSelect={(media) => onFeaturedImageChange(media.imageUrl ?? "")}
+        />
       </div>
 
       <div>
