@@ -184,6 +184,7 @@ function UsersPage() {
 
   const openEditDialog = (user: AuthorUser) => {
     setEditingUser(user)
+    setUserType(user.__t === "reviewer" ? "reviewer" : "author")
     setFirstName(user.firstName ?? "")
     setLastName(user.lastName ?? "")
     setEmail(user.email ?? "")
@@ -282,6 +283,7 @@ function UsersPage() {
     try {
       if (editingUser?._id) {
         const updated = await updateUser(editingUser._id, {
+          __t: userType,
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
@@ -303,6 +305,7 @@ function UsersPage() {
         toast.success("Author updated")
       } else {
         const created = await createUser({
+          __t: userType,
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
