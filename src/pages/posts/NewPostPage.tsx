@@ -97,6 +97,8 @@ function NewPostPage() {
   const [status, setStatus] = useState<PublishStatus>("draft")
   const [scheduleDate, setScheduleDate] = useState("")
   const [scheduleTime, setScheduleTime] = useState("")
+  const [publishDate, setPublishDate] = useState("")
+  const [publishTime, setPublishTime] = useState("")
 
   const [categories, setCategories] = useState<Category[]>([])
   const [isLoadingCategories, setIsLoadingCategories] = useState(true)
@@ -213,7 +215,8 @@ function NewPostPage() {
 
   const performSave = async (
     targetStatus: PublishStatus,
-    scheduledAtIso?: string
+    scheduledAtIso?: string,
+    publishedAtIso?: string
   ) => {
     if (!title.trim() || blocks.length === 0) {
       toast.error("Title and content are required.")
@@ -234,13 +237,16 @@ function NewPostPage() {
         categories: categoryId ? [categoryId] : [],
         excerpt,
         featuredImage: featuredImageUrl,
-        reviewerId: reviewerId || undefined,
+        reviewerId: reviewerId || null,
         audienceNote,
         metaTitle: seoTitle,
         metaDescription,
         canonicalUrl,
         ...(targetStatus === "schedule" && scheduledAtIso
           ? { scheduledAt: scheduledAtIso }
+          : {}),
+        ...(targetStatus === "publish" && publishedAtIso
+          ? { publishedAt: publishedAtIso }
           : {}),
       }
 
@@ -283,12 +289,17 @@ function NewPostPage() {
     if (!slug.trim()) {
       setSlug(slugify(title))
     }
+    const base = publishedAt ? new Date(publishedAt) : new Date()
+    setPublishDate(base.toISOString().slice(0, 10))
+    setPublishTime(base.toISOString().slice(11, 16))
     setIsPublishDialogOpen(true)
   }
 
   const handleConfirmPublish = () => {
     setIsPublishDialogOpen(false)
-    performSave("publish")
+    const publishedAtIso =
+      publishDate && publishTime ? `${publishDate}T${publishTime}:00` : undefined
+    performSave("publish", undefined, publishedAtIso)
   }
 
   const handleAddBlock = (type: BlockType) => {
@@ -403,6 +414,8 @@ function NewPostPage() {
                 publishingProps={{
                   title,
                   onTitleChange: setTitle,
+                  seoTitle,
+                  onSeoTitleChange: setSeoTitle,
                   excerpt,
                   onExcerptChange: setExcerpt,
                   status,
@@ -447,6 +460,10 @@ function NewPostPage() {
         onOpenChange={setIsPublishDialogOpen}
         slug={slug}
         onSlugChange={(value) => setSlug(slugify(value))}
+        publishDate={publishDate}
+        onPublishDateChange={setPublishDate}
+        publishTime={publishTime}
+        onPublishTimeChange={setPublishTime}
         onConfirm={handleConfirmPublish}
         isPublishing={isSaving}
       />

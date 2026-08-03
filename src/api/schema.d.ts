@@ -2402,6 +2402,10 @@ export interface components {
             content?: string;
             slug?: string;
             excerpt?: string;
+            /** Format: uri */
+            featuredImage?: string;
+            featuredImageAlt?: string;
+            featuredImageTitle?: string;
             author?: string;
             authorId?: components["schemas"]["ObjectId"];
             reviewerId?: (components["schemas"]["ObjectId"] | {
@@ -2420,7 +2424,35 @@ export interface components {
             publishedAt?: string;
             /** Format: date-time */
             scheduledAt?: string;
+            metaTitle?: string;
+            metaDescription?: string;
+            metaKeywords?: string;
+            ogTitle?: string;
+            ogDescription?: string;
+            /** Format: uri */
+            ogImage?: string;
+            ogType?: string;
+            /** Format: uri */
+            ogUrl?: string;
+            twitterCard?: string;
+            twitterTitle?: string;
+            twitterDescription?: string;
+            /** Format: uri */
+            twitterImage?: string;
+            /** Format: uri */
+            canonicalUrl?: string;
+            robots?: string;
+            schemaMarkup?: {
+                [key: string]: unknown;
+            };
             categories?: components["schemas"]["BlogCategory"][];
+            seoAnalysis?: {
+                [key: string]: unknown;
+            };
+            audienceNote?: string;
+            contentBlocks?: {
+                [key: string]: unknown;
+            }[];
             /** Format: date-time */
             createdAt?: string;
             /** Format: date-time */
@@ -2430,6 +2462,11 @@ export interface components {
             title: string;
             content: string;
             slug?: string;
+            excerpt?: string;
+            /** Format: uri */
+            featuredImage?: string;
+            featuredImageAlt?: string;
+            featuredImageTitle?: string;
             author: string;
             reviewerId?: components["schemas"]["ObjectId"];
             status?: components["schemas"]["BlogStatus"];
@@ -2441,7 +2478,37 @@ export interface components {
             tags?: string[];
             categories?: components["schemas"]["ObjectId"][];
             /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
             scheduledAt?: string;
+            metaTitle?: string;
+            metaDescription?: string;
+            metaKeywords?: string;
+            ogTitle?: string;
+            ogDescription?: string;
+            /** Format: uri */
+            ogImage?: string;
+            ogType?: string;
+            /** Format: uri */
+            ogUrl?: string;
+            twitterCard?: string;
+            twitterTitle?: string;
+            twitterDescription?: string;
+            /** Format: uri */
+            twitterImage?: string;
+            /** Format: uri */
+            canonicalUrl?: string;
+            robots?: string;
+            schemaMarkup?: {
+                [key: string]: unknown;
+            };
+            seoAnalysis?: {
+                [key: string]: unknown;
+            };
+            audienceNote?: string;
+            contentBlocks?: {
+                [key: string]: unknown;
+            }[];
         };
         AuthorBlogCreateBody: {
             title: string;
@@ -2450,6 +2517,8 @@ export interface components {
             excerpt?: string;
             /** Format: uri */
             featuredImage?: string;
+            featuredImageAlt?: string;
+            featuredImageTitle?: string;
             reviewerId?: components["schemas"]["ObjectId"];
             status?: components["schemas"]["BlogStatus"];
             /**
@@ -2460,12 +2529,47 @@ export interface components {
             tags?: string[];
             categories?: components["schemas"]["ObjectId"][];
             /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
             scheduledAt?: string;
+            metaTitle?: string;
+            metaDescription?: string;
+            metaKeywords?: string;
+            ogTitle?: string;
+            ogDescription?: string;
+            /** Format: uri */
+            ogImage?: string;
+            ogType?: string;
+            /** Format: uri */
+            ogUrl?: string;
+            twitterCard?: string;
+            twitterTitle?: string;
+            twitterDescription?: string;
+            /** Format: uri */
+            twitterImage?: string;
+            /** Format: uri */
+            canonicalUrl?: string;
+            robots?: string;
+            schemaMarkup?: {
+                [key: string]: unknown;
+            };
+            seoAnalysis?: {
+                [key: string]: unknown;
+            };
+            audienceNote?: string;
+            contentBlocks?: {
+                [key: string]: unknown;
+            }[];
         };
         BlogUpdateBody: {
             title?: string;
             content?: string;
             slug?: string;
+            excerpt?: string;
+            /** Format: uri */
+            featuredImage?: string;
+            featuredImageAlt?: string;
+            featuredImageTitle?: string;
             author?: string;
             reviewerId?: components["schemas"]["ObjectId"];
             status?: components["schemas"]["BlogStatus"];
@@ -2474,7 +2578,37 @@ export interface components {
             tags?: string[];
             categories?: components["schemas"]["ObjectId"][];
             /** Format: date-time */
+            publishedAt?: string;
+            /** Format: date-time */
             scheduledAt?: string;
+            metaTitle?: string;
+            metaDescription?: string;
+            metaKeywords?: string;
+            ogTitle?: string;
+            ogDescription?: string;
+            /** Format: uri */
+            ogImage?: string;
+            ogType?: string;
+            /** Format: uri */
+            ogUrl?: string;
+            twitterCard?: string;
+            twitterTitle?: string;
+            twitterDescription?: string;
+            /** Format: uri */
+            twitterImage?: string;
+            /** Format: uri */
+            canonicalUrl?: string;
+            robots?: string;
+            schemaMarkup?: {
+                [key: string]: unknown;
+            };
+            seoAnalysis?: {
+                [key: string]: unknown;
+            };
+            audienceNote?: string;
+            contentBlocks?: {
+                [key: string]: unknown;
+            }[];
         };
         CvTemplate: {
             _id?: components["schemas"]["ObjectId"];

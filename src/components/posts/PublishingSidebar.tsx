@@ -34,6 +34,8 @@ type PublishStatus = "draft" | "schedule" | "publish"
 type PublishingSidebarProps = {
   title: string
   onTitleChange: (value: string) => void
+  seoTitle: string
+  onSeoTitleChange: (value: string) => void
   excerpt: string
   onExcerptChange: (value: string) => void
   status: PublishStatus
@@ -68,6 +70,8 @@ const DEFAULT_TAG_COLOR = "#E97451"
 function PublishingSidebar({
   title,
   onTitleChange,
+  seoTitle,
+  onSeoTitleChange,
   excerpt,
   onExcerptChange,
   status,
@@ -139,6 +143,18 @@ function PublishingSidebar({
           onChange={(event) => onTitleChange(event.target.value)}
           placeholder="Post title..."
           className="min-h-16 resize-none rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          SEO Title
+        </Label>
+        <Input
+          value={seoTitle}
+          onChange={(event) => onSeoTitleChange(event.target.value)}
+          placeholder="Defaults to the article title if left blank"
+          className="h-10 rounded-[10px] border border-[#E8E8EC] bg-white"
         />
       </div>
 
