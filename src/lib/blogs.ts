@@ -38,8 +38,18 @@ type BlogSeoFields = {
 }
 
 type Blog = components["schemas"]["Blog"] & BlogSeoFields
-type BlogCreateBody = components["schemas"]["BlogCreateBody"] & BlogSeoFields
-type BlogUpdateBody = components["schemas"]["BlogUpdateBody"] & BlogSeoFields
+
+/**
+ * The generated schema types `reviewerId` as a plain id string, but the live
+ * API also accepts `null` to explicitly clear a previously-assigned
+ * reviewer (verified directly against the backend) — `undefined` is instead
+ * dropped by `JSON.stringify` and leaves the existing value untouched on a
+ * partial update, so callers must send `null`, not `undefined`, to clear it.
+ */
+type BlogCreateBody = Omit<components["schemas"]["BlogCreateBody"], "reviewerId"> &
+  BlogSeoFields & { reviewerId?: string | null }
+type BlogUpdateBody = Omit<components["schemas"]["BlogUpdateBody"], "reviewerId"> &
+  BlogSeoFields & { reviewerId?: string | null }
 
 /**
  * `Blog.reviewerId` can come back as a plain id string or, when the backend

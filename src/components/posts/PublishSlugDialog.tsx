@@ -1,4 +1,9 @@
+import { format, parse } from "date-fns"
+import { CalendarIcon } from "lucide-react"
+import { useState } from "react"
+
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Dialog,
   DialogContent,
@@ -9,12 +14,23 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+
+const DATE_FORMAT = "yyyy-MM-dd"
 
 function PublishSlugDialog({
   open,
   onOpenChange,
   slug,
   onSlugChange,
+  publishDate,
+  onPublishDateChange,
+  publishTime,
+  onPublishTimeChange,
   onConfirm,
   isPublishing,
 }: {
@@ -22,9 +38,19 @@ function PublishSlugDialog({
   onOpenChange: (open: boolean) => void
   slug: string
   onSlugChange: (value: string) => void
+  publishDate: string
+  onPublishDateChange: (value: string) => void
+  publishTime: string
+  onPublishTimeChange: (value: string) => void
   onConfirm: () => void
   isPublishing: boolean
 }) {
+  const [isDatePopoverOpen, setIsDatePopoverOpen] = useState(false)
+
+  const selectedDate = publishDate
+    ? parse(publishDate, DATE_FORMAT, new Date())
+    : undefined
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -48,6 +74,45 @@ function PublishSlugDialog({
               value={slug}
               onChange={(event) => onSlugChange(event.target.value)}
               className="h-10 rounded-lg border-0 bg-transparent px-1 text-[#161616] shadow-none focus-visible:ring-0"
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="publish-date">Published date</Label>
+          <div className="flex gap-2">
+            <Popover open={isDatePopoverOpen} onOpenChange={setIsDatePopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  id="publish-date"
+                  type="button"
+                  variant="outline"
+                  className="h-10 flex-1 justify-start rounded-lg border-[#E8E8EC] font-normal"
+                >
+                  <CalendarIcon className="size-4 text-[#8C8C8C]" />
+                  {selectedDate ? format(selectedDate, "PPP") : "Pick a date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  captionLayout="dropdown"
+                  onSelect={(date) => {
+                    if (!date) {
+                      return
+                    }
+                    onPublishDateChange(format(date, DATE_FORMAT))
+                    setIsDatePopoverOpen(false)
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+            <Input
+              type="time"
+              value={publishTime}
+              onChange={(event) => onPublishTimeChange(event.target.value)}
+              className="h-10 w-32 rounded-lg border border-[#E8E8EC]"
             />
           </div>
         </div>
