@@ -1,15 +1,17 @@
-import { ImagePlus, LibraryBig } from "lucide-react"
-import { useRef, useState, type ChangeEvent } from "react"
-import { toast } from "sonner"
+import { RefreshCw } from "lucide-react"
 
 import { RepeatingRows, StringListEditor } from "@/components/builder/inputs"
-import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { uploadAndRegisterImage } from "@/lib/image-upload"
+import { getStoredUser } from "@/lib/auth"
 import type { AuthorBioBlock } from "@/lib/blocks/types"
+
+function initialsFor(name: string) {
+  const parts = name.trim().split(/\s+/)
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?"
+}
 
 function AuthorBioBlockEditor({
   block,
@@ -18,100 +20,51 @@ function AuthorBioBlockEditor({
   block: AuthorBioBlock
   onChange: (block: AuthorBioBlock) => void
 }) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [isLibraryOpen, setIsLibraryOpen] = useState(false)
-
-  const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    event.target.value = ""
-    if (!file) {
-      return
-    }
-
-    setIsUploading(true)
-    try {
-      const url = await uploadAndRegisterImage(file, block.name || "Author avatar")
-      onChange({ ...block, avatarUrl: url })
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Unable to upload image."
-      )
-    } finally {
-      setIsUploading(false)
-    }
+  const syncFromProfile = () => {
+    const user = getStoredUser()
+    onChange({
+      ...block,
+      name: user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "",
+      title: user?.title ?? "",
+      avatarUrl: user?.profileImage ?? "",
+      bio: user?.bio ?? "",
+    })
   }
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <Input
-          value={block.name}
-          placeholder="Name"
-          onChange={(event) => onChange({ ...block, name: event.target.value })}
-        />
-        <Input
-          value={block.title}
-          placeholder="Title (e.g. Senior Career Strategist)"
-          onChange={(event) =>
-            onChange({ ...block, title: event.target.value })
-          }
-        />
-      </div>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleFileChange}
-      />
-      <div className="flex items-center gap-3">
-        {block.avatarUrl ? (
-          <img
-            src={block.avatarUrl}
-            alt={block.name}
-            className="size-16 shrink-0 rounded-full object-cover"
-          />
-        ) : (
-          <div className="flex size-16 shrink-0 items-center justify-center rounded-full border border-dashed border-[#E8E8EC] text-[#8C8C8C]">
-            <ImagePlus className="size-5" />
-          </div>
-        )}
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          disabled={isUploading}
-          onClick={() => fileInputRef.current?.click()}
-        >
-          {isUploading
-            ? "Uploading…"
-            : block.avatarUrl
-              ? "Replace photo"
-              : "Upload photo"}
-        </Button>
+      <div className="flex items-center gap-3 rounded-lg border border-[#E8E8EC] bg-[#FAFAFA] p-3">
+        <Avatar className="size-12 shrink-0">
+          {block.avatarUrl && (
+            <AvatarImage src={block.avatarUrl} alt={block.name} />
+          )}
+          <AvatarFallback className="bg-[#FDECE3] font-semibold text-[#E97451]">
+            {initialsFor(block.name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold text-[#161616]">
+            {block.name || "No name on file"}
+          </p>
+          <p className="truncate text-xs text-[#8C8C8C]">
+            {block.title || "—"}
+          </p>
+        </div>
         <Button
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => setIsLibraryOpen(true)}
+          onClick={syncFromProfile}
         >
-          <LibraryBig className="size-3.5" />
-          Library
+          <RefreshCw className="size-3.5" />
+          Sync
         </Button>
       </div>
-      <MediaLibraryDialog
-        open={isLibraryOpen}
-        onOpenChange={setIsLibraryOpen}
-        onSelect={(media) =>
-          onChange({ ...block, avatarUrl: media.imageUrl ?? "" })
-        }
-      />
-      <Textarea
-        value={block.bio}
-        placeholder="Bio"
-        onChange={(event) => onChange({ ...block, bio: event.target.value })}
-      />
+      <p className="-mt-1 text-xs text-[#8C8C8C]">
+        Name, title, photo, and bio come from your author profile and aren't
+        editable here. Update your profile, then hit Sync to pull the latest
+        version into this post.
+      </p>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <Input
           value={block.bioLinkLabel}

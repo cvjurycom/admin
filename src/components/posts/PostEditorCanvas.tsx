@@ -237,7 +237,12 @@ function PostEditorCanvas({
         <h1 className="mt-4 text-3xl font-bold text-[#161616] sm:text-4xl">
           {title || "Untitled Post"}
         </h1>
-        {excerpt && <p className="mt-4 text-base text-[#6B6B6B]">{excerpt}</p>}
+        {excerpt && (
+          <div
+            className="mt-4 text-base text-[#6B6B6B] [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:m-0 [&_ul]:list-disc [&_ul]:pl-5"
+            dangerouslySetInnerHTML={{ __html: excerpt }}
+          />
+        )}
 
         <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-4">
