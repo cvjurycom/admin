@@ -234,6 +234,7 @@ function NewPostPage() {
         categories: categoryId ? [categoryId] : [],
         excerpt,
         featuredImage: featuredImageUrl,
+        reviewerId: reviewerId || undefined,
         audienceNote,
         metaTitle: seoTitle,
         metaDescription,
