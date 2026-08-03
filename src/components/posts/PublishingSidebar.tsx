@@ -3,6 +3,7 @@ import { useRef, useState, type ChangeEvent } from "react"
 import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
+import { InlineRichTextInput } from "@/components/builder/inputs"
 import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -145,11 +146,10 @@ function PublishingSidebar({
         <Label className="mb-2 text-sm font-medium text-[#161616]">
           Subtitle
         </Label>
-        <Textarea
+        <InlineRichTextInput
           value={excerpt}
-          onChange={(event) => onExcerptChange(event.target.value)}
+          onChange={onExcerptChange}
           placeholder="Write a short excerpt that summarizes this post..."
-          className="min-h-20 resize-none rounded-[10px] border border-[#E8E8EC] bg-white"
         />
       </div>
 

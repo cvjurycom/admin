@@ -7,6 +7,7 @@ function StepFlowBlockView({ block }: { block: StepFlowBlock }) {
   if (steps.length === 0) {
     return null
   }
+  const showStepNumbers = block.showStepNumbers ?? true
   return (
     <div className="not-prose my-6">
       {block.title && (
@@ -18,10 +19,18 @@ function StepFlowBlockView({ block }: { block: StepFlowBlock }) {
         {steps.map((step, index) => (
           <div key={index} className="flex flex-1 items-stretch gap-2">
             <div className="flex-1 rounded-xl border border-[#E8E8EC] bg-white p-4">
-              <p className="text-xs font-semibold text-[#E97451]">
-                Step {index + 1}
-              </p>
-              <p className="mt-1 text-sm font-medium text-[#161616]">
+              {showStepNumbers && (
+                <p className="text-xs font-semibold text-[#E97451]">
+                  Step {index + 1}
+                </p>
+              )}
+              <p
+                className={
+                  showStepNumbers
+                    ? "mt-1 text-sm font-medium text-[#161616]"
+                    : "text-sm font-medium text-[#161616]"
+                }
+              >
                 {step.title}
               </p>
               {step.description && (

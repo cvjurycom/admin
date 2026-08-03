@@ -104,6 +104,7 @@ export type StepFlowBlock = BlockBase & {
   type: "stepFlow"
   title: string
   steps: { title: string; description: string }[]
+  showStepNumbers?: boolean
 }
 export type NumberedListBlock = BlockBase & {
   type: "numberedList"

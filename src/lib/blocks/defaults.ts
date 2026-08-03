@@ -1,8 +1,19 @@
+import { getStoredUser } from "@/lib/auth"
 import { DEFAULT_COLOR } from "@/lib/colors"
 import type { Block, BlockType } from "@/lib/blocks/types"
 
 function newId() {
   return crypto.randomUUID()
+}
+
+function currentAuthorProfile() {
+  const user = getStoredUser()
+  return {
+    name: user ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() : "",
+    title: user?.title ?? "",
+    avatarUrl: user?.profileImage ?? "",
+    bio: user?.bio ?? "",
+  }
 }
 
 export function createBlock(type: BlockType): Block {
@@ -47,10 +58,7 @@ export function createBlock(type: BlockType): Block {
       return {
         id,
         type,
-        name: "",
-        title: "",
-        avatarUrl: "",
-        bio: "",
+        ...currentAuthorProfile(),
         bioLinkLabel: "",
         bioLinkUrl: "",
         badges: [],
