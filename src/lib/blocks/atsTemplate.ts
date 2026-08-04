@@ -221,13 +221,14 @@ export function createAtsGuideTemplateBlocks(): Block[] {
     {
       id: id(),
       type: "authorBio",
-      name: "Ita John, PhD",
+      name: "Ita John (PhD)",
       title: "Founder, CVJury",
-      avatarUrl: "",
-      bio: "Dr. John is the founder of CVJury. He previously worked as an IT recruiter for the London market at Star Jobs Recruitment and NECareersConnect, and brings experience across recruitment, project management, business development, and AI. He earned a PhD in entrepreneurship, international business, and economics from Oxford Brookes University.",
-      bioLinkLabel: "",
-      bioLinkUrl: "",
-      badges: ["CPRW Certified", "LinkedIn Top Voice", "Former IT Recruiter", "Certified AI Generalist"],
+      avatarUrl:
+        "https://res.cloudinary.com/dk9nozmjv/image/upload/v1785771021/jdnfz0vukgfwattgcqmo.jpg",
+      bio: "Dr Ita John is the founder of CVJury. He previously worked as an IT recruiter for the London market at Star Jobs Recruitment and founded the NECareersConnect careers platform. He brings experience in recruitment, practical project management, and business development. Earlier in his career, he taught business and economics at Oxford Brookes University and in Nigeria for over a decade. He lives in England with his wife and three sons. He earned a PhD in Entrepreneurship, International Business, and Economics from Oxford Brookes University. See how his background shapes the work he does for you.",
+      bioLinkLabel: "Read his story",
+      bioLinkUrl: "https://cvjury.com/our-story/",
+      badges: [],
     },
   ]
 }
