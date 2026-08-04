@@ -59,6 +59,7 @@ function AuthorBioBlockView({ block }: { block: AuthorBioBlock }) {
                   >
                     {block.bioLinkLabel}
                   </a>
+                  .
                 </>
               )}
             </p>
