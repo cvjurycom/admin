@@ -1,3 +1,4 @@
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import type { ImageBlock } from "@/lib/blocks/types"
 
 function ImageBlockView({ block }: { block: ImageBlock }) {
@@ -7,7 +8,7 @@ function ImageBlockView({ block }: { block: ImageBlock }) {
   return (
     <figure className="not-prose my-6">
       <img
-        src={block.src}
+        src={cloudinaryAuto(block.src)}
         alt={block.alt}
         className="aspect-video w-full rounded-xl object-cover"
       />

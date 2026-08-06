@@ -1,5 +1,6 @@
 import { ImageIcon } from "lucide-react"
 
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import type { CvTemplateShowcaseBlock } from "@/lib/blocks/types"
 
 function CvTemplateShowcaseBlockView({
@@ -39,7 +40,7 @@ function CvTemplateShowcaseBlockView({
             images.map((image, index) => (
               <img
                 key={index}
-                src={image.src}
+                src={cloudinaryAuto(image.src)}
                 alt={image.alt}
                 className="w-full rounded-lg border border-[#E8E8EC] bg-white object-contain shadow-sm"
               />

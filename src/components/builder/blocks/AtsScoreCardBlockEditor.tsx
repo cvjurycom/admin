@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { AtsScoreCardBlock } from "@/lib/blocks/types"
 
@@ -54,7 +55,7 @@ function AtsScoreCardBlockEditor({
       {block.imageSrc ? (
         <div className="relative">
           <img
-            src={block.imageSrc}
+            src={cloudinaryAuto(block.imageSrc)}
             alt={block.imageAlt}
             className="w-full rounded-lg border border-[#E8E8EC] object-cover"
           />

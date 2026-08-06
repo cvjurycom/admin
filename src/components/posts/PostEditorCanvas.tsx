@@ -23,6 +23,7 @@ import { useState } from "react"
 
 import { CanvasBlockWrapper } from "@/components/builder/CanvasBlockWrapper"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import { renderBlocksToHtml } from "@/lib/blocks/render-html"
 import type { Block } from "@/lib/blocks/types"
 
@@ -344,7 +345,7 @@ function PostEditorCanvas({
 
         {featuredImageUrl && (
           <img
-            src={featuredImageUrl}
+            src={cloudinaryAuto(featuredImageUrl)}
             alt={title || "Featured image"}
             className="mt-6 aspect-video w-full rounded-xl object-cover"
           />

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ApiError } from "@/lib/api-client"
 import { listBlogs, type Blog } from "@/lib/blogs"
+import { cloudinaryThumbnail } from "@/lib/cloudinary"
 
 const statusLabels: Record<string, string> = {
   published: "Published",
@@ -140,7 +141,7 @@ function RecentPostsCard() {
               >
                 {post.featuredImage ? (
                   <img
-                    src={post.featuredImage}
+                    src={cloudinaryThumbnail(post.featuredImage, 80)}
                     alt=""
                     className="size-10 shrink-0 rounded-lg object-cover"
                   />

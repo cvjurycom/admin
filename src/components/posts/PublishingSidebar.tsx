@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { Category } from "@/lib/categories"
 import type { Tag } from "@/lib/tags"
@@ -335,7 +336,7 @@ function PublishingSidebar({
           {featuredImageUrl ? (
             <>
               <img
-                src={featuredImageUrl}
+                src={cloudinaryAuto(featuredImageUrl)}
                 alt="Featured preview"
                 className="h-full w-full object-cover"
               />
