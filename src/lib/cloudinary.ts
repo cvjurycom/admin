@@ -7,6 +7,21 @@ type CloudinaryUploadResult = {
   mimeType: string
 }
 
+/**
+ * Rewrites a Cloudinary delivery URL to permanently serve WebP, so the URL
+ * we register with our own backend (and store on blocks) is already
+ * optimized — not just optimized at render time via `cloudinaryAuto`.
+ */
+function toWebpUrl(url: string): string {
+  const marker = "/upload/"
+  const index = url.indexOf(marker)
+  if (index === -1) {
+    return url
+  }
+  const insertAt = index + marker.length
+  return `${url.slice(0, insertAt)}f_webp,q_auto/${url.slice(insertAt)}`
+}
+
 async function uploadImageToCloudinary(
   file: File
 ): Promise<CloudinaryUploadResult> {
@@ -47,10 +62,10 @@ async function uploadImageToCloudinary(
   }
 
   return {
-    url: String(body.secure_url),
+    url: toWebpUrl(String(body.secure_url)),
     filename: String(body.original_filename ?? file.name),
     size: Number(body.bytes ?? file.size),
-    mimeType: file.type,
+    mimeType: "image/webp",
   }
 }
 
@@ -67,7 +82,23 @@ function cloudinaryThumbnail(url: string, size = 400): string {
     return url
   }
   const insertAt = index + marker.length
-  return `${url.slice(0, insertAt)}c_fill,g_auto,w_${size},h_${size}/${url.slice(insertAt)}`
+  return `${url.slice(0, insertAt)}c_fill,g_auto,w_${size},h_${size},f_auto,q_auto/${url.slice(insertAt)}`
+}
+
+/**
+ * Serves the image in whatever format is smallest for the requesting
+ * browser (AVIF, WebP, or the original as a fallback) instead of always
+ * shipping the originally-uploaded format. Use this for any full-size
+ * content image rendered from a Cloudinary URL.
+ */
+function cloudinaryAuto(url: string): string {
+  const marker = "/upload/"
+  const index = url.indexOf(marker)
+  if (index === -1) {
+    return url
+  }
+  const insertAt = index + marker.length
+  return `${url.slice(0, insertAt)}f_auto,q_auto/${url.slice(insertAt)}`
 }
 
 /**
@@ -84,8 +115,13 @@ function cloudinaryAvatar(url: string, size = 400): string {
     return url
   }
   const insertAt = index + marker.length
-  return `${url.slice(0, insertAt)}e_background_removal/c_fill,g_face,w_${size},h_${size}/${url.slice(insertAt)}`
+  return `${url.slice(0, insertAt)}e_background_removal/c_fill,g_face,w_${size},h_${size},f_auto,q_auto/${url.slice(insertAt)}`
 }
 
-export { cloudinaryAvatar, cloudinaryThumbnail, uploadImageToCloudinary }
+export {
+  cloudinaryAuto,
+  cloudinaryAvatar,
+  cloudinaryThumbnail,
+  uploadImageToCloudinary,
+}
 export type { CloudinaryUploadResult }

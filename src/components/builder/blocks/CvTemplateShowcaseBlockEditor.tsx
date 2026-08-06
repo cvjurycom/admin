@@ -6,6 +6,7 @@ import { RepeatingRows } from "@/components/builder/inputs"
 import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { CvTemplateShowcaseBlock } from "@/lib/blocks/types"
 
@@ -57,7 +58,7 @@ function TemplateImageUpload({
       {image.src ? (
         <div className="relative">
           <img
-            src={image.src}
+            src={cloudinaryAuto(image.src)}
             alt={image.alt}
             className="w-full rounded-lg border border-[#E8E8EC] object-cover"
           />

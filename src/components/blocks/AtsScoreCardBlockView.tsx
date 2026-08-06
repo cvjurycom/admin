@@ -1,5 +1,6 @@
 import { ImageIcon } from "lucide-react"
 
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import type { AtsScoreCardBlock } from "@/lib/blocks/types"
 
 function AtsScoreCardBlockView({ block }: { block: AtsScoreCardBlock }) {
@@ -27,7 +28,7 @@ function AtsScoreCardBlockView({ block }: { block: AtsScoreCardBlock }) {
 
       {block.imageSrc ? (
         <img
-          src={block.imageSrc}
+          src={cloudinaryAuto(block.imageSrc)}
           alt={block.imageAlt}
           className="w-full object-cover"
         />

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { getStoredUser } from "@/lib/auth"
+import { cloudinaryAvatar } from "@/lib/cloudinary"
 import type { AuthorBioBlock } from "@/lib/blocks/types"
 
 function initialsFor(name: string) {
@@ -36,7 +37,10 @@ function AuthorBioBlockEditor({
       <div className="flex items-center gap-3 rounded-lg border border-[#E8E8EC] bg-[#FAFAFA] p-3">
         <Avatar className="size-12 shrink-0">
           {block.avatarUrl && (
-            <AvatarImage src={block.avatarUrl} alt={block.name} />
+            <AvatarImage
+              src={cloudinaryAvatar(block.avatarUrl, 96)}
+              alt={block.name}
+            />
           )}
           <AvatarFallback className="bg-[#FDECE3] font-semibold text-[#E97451]">
             {initialsFor(block.name)}

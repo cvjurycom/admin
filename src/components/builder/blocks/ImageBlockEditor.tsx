@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { cloudinaryAuto } from "@/lib/cloudinary"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { ImageBlock } from "@/lib/blocks/types"
 
@@ -51,7 +52,7 @@ function ImageBlockEditor({
       {block.src ? (
         <div className="relative">
           <img
-            src={block.src}
+            src={cloudinaryAuto(block.src)}
             alt={block.alt}
             className="aspect-video w-full rounded-lg object-cover"
           />
