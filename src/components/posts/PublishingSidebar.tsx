@@ -37,6 +37,8 @@ type PublishingSidebarProps = {
   onTitleChange: (value: string) => void
   seoTitle: string
   onSeoTitleChange: (value: string) => void
+  metaDescription: string
+  onMetaDescriptionChange: (value: string) => void
   excerpt: string
   onExcerptChange: (value: string) => void
   status: PublishStatus
@@ -73,6 +75,8 @@ function PublishingSidebar({
   onTitleChange,
   seoTitle,
   onSeoTitleChange,
+  metaDescription,
+  onMetaDescriptionChange,
   excerpt,
   onExcerptChange,
   status,
@@ -157,6 +161,21 @@ function PublishingSidebar({
           placeholder="Defaults to the article title if left blank"
           className="h-10 rounded-[10px] border border-[#E8E8EC] bg-white"
         />
+      </div>
+
+      <div>
+        <Label className="mb-2 text-sm font-medium text-[#161616]">
+          Meta Description
+        </Label>
+        <Textarea
+          value={metaDescription}
+          onChange={(event) => onMetaDescriptionChange(event.target.value)}
+          placeholder="Defaults to the subtitle if left blank"
+          className="min-h-20 resize-none rounded-[10px] border border-[#E8E8EC] bg-white"
+        />
+        <p className="mt-1 text-xs text-[#9A9A9A]">
+          {metaDescription.length}/160 characters
+        </p>
       </div>
 
       <div>

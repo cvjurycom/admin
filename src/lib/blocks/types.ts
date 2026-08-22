@@ -38,7 +38,11 @@ import {
 
 type BlockBase = { id: string }
 
-export type RichTextBlock = BlockBase & { type: "richtext"; html: string }
+export type RichTextBlock = BlockBase & {
+  type: "richtext"
+  html: string
+  variant?: "default" | "card"
+}
 export type HeadingBlock = BlockBase & {
   type: "heading"
   text: string
