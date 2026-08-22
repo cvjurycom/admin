@@ -85,7 +85,7 @@ function AuthorBioBlockView({ block }: { block: AuthorBioBlock }) {
                 {links.map((link, index) => (
                   <a
                     key={index}
-                    href={link.url || "#"}
+                    href={link.url || "#"} 
                     className="flex items-center gap-2 rounded-[8px] border border-[#E8E4DF] bg-white px-4 py-2 text-xs font-medium text-[#232326]"
                   >
                     <LinkIcon label={link.label} />

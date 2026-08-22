@@ -28,7 +28,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ApiError } from "@/lib/api-client"
-import { createBlog, deleteBlog, listBlogs, type Blog } from "@/lib/blogs"
+import {
+  createBlog,
+  deleteBlog,
+  listBlogs,
+  permanentlyDeleteBlog,
+  type Blog,
+} from "@/lib/blogs"
 import { listCategories, type Category } from "@/lib/categories"
 
 const statusLabels: Record<string, string> = {
@@ -95,6 +101,9 @@ function PostsPage() {
   const [categoryFilterIds, setCategoryFilterIds] = useState<string[]>([])
   const [postPendingDelete, setPostPendingDelete] = useState<Blog | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [postPendingPermanentDelete, setPostPendingPermanentDelete] =
+    useState<Blog | null>(null)
+  const [isPermanentlyDeleting, setIsPermanentlyDeleting] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -194,6 +203,29 @@ function PostsPage() {
       )
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const confirmPermanentDelete = async () => {
+    if (!postPendingPermanentDelete?._id) {
+      return
+    }
+    setIsPermanentlyDeleting(true)
+    try {
+      await permanentlyDeleteBlog(postPendingPermanentDelete._id)
+      setPosts((current) =>
+        current.filter((item) => item._id !== postPendingPermanentDelete._id)
+      )
+      toast.success("Post permanently deleted")
+      setPostPendingPermanentDelete(null)
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError
+          ? err.message
+          : "Unable to permanently delete post."
+      )
+    } finally {
+      setIsPermanentlyDeleting(false)
     }
   }
 
@@ -425,7 +457,7 @@ function PostsPage() {
                               <MoreVertical className="size-4" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem
                               onSelect={() =>
                                 navigate("/posts/new", {
@@ -445,6 +477,14 @@ function PostsPage() {
                               onSelect={() => setPostPendingDelete(post)}
                             >
                               Delete
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onSelect={() =>
+                                setPostPendingPermanentDelete(post)
+                              }
+                            >
+                              Delete Permanently
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -501,9 +541,24 @@ function PostsPage() {
           }
         }}
         title="Delete post?"
-        description={`This will permanently delete "${postPendingDelete?.title ?? ""}". This can't be undone.`}
+        description={`This will remove "${postPendingDelete?.title ?? ""}" from your posts. It won't be visible anywhere, but the record is kept — use "Delete Permanently" instead if you want it gone for good.`}
         onConfirm={confirmDelete}
         isDeleting={isDeleting}
+      />
+
+      <DeleteConfirmDialog
+        open={postPendingPermanentDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPostPendingPermanentDelete(null)
+          }
+        }}
+        title="Delete post permanently?"
+        description={`This will permanently delete "${postPendingPermanentDelete?.title ?? ""}" and cannot be undone.`}
+        onConfirm={confirmPermanentDelete}
+        isDeleting={isPermanentlyDeleting}
+        confirmLabel="Delete Permanently"
+        confirmingLabel="Deleting…"
       />
     </DashboardLayout>
   )
