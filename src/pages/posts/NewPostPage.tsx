@@ -416,6 +416,8 @@ function NewPostPage() {
                   onTitleChange: setTitle,
                   seoTitle,
                   onSeoTitleChange: setSeoTitle,
+                  metaDescription,
+                  onMetaDescriptionChange: setMetaDescription,
                   excerpt,
                   onExcerptChange: setExcerpt,
                   status,

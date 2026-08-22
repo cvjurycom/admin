@@ -21,6 +21,7 @@ import { useRef, useState, type ChangeEvent } from "react"
 import { toast } from "sonner"
 
 import { MediaLibraryDialog } from "@/components/media/MediaLibraryDialog"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { uploadAndRegisterImage } from "@/lib/image-upload"
 import type { RichTextBlock } from "@/lib/blocks/types"
@@ -250,6 +251,20 @@ function RichTextBlockEditor({
         ))}
       </div>
       <EditorContent editor={editor} />
+      <div className="flex items-center gap-2 border-t border-[#E8E8EC] px-2 py-1.5">
+        <span className="text-xs text-[#8C8C8C]">Style</span>
+        {(["default", "card"] as const).map((option) => (
+          <Button
+            key={option}
+            type="button"
+            variant={(block.variant ?? "default") === option ? "default" : "outline"}
+            size="sm"
+            onClick={() => onChange({ ...block, variant: option })}
+          >
+            {option === "default" ? "Plain text" : "Bordered card"}
+          </Button>
+        ))}
+      </div>
     </div>
   )
 }
