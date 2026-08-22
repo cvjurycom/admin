@@ -161,6 +161,9 @@ function PublishingSidebar({
           placeholder="Defaults to the article title if left blank"
           className="h-10 rounded-[10px] border border-[#E8E8EC] bg-white"
         />
+        <p className="mt-1 text-xs text-[#9A9A9A]">
+          {seoTitle.length}/60 characters
+        </p>
       </div>
 
       <div>
