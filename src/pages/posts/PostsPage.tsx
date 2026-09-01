@@ -28,7 +28,13 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ApiError } from "@/lib/api-client"
-import { createBlog, deleteBlog, listBlogs, type Blog } from "@/lib/blogs"
+import {
+  createBlog,
+  deleteBlog,
+  listBlogs,
+  permanentlyDeleteBlog,
+  type Blog,
+} from "@/lib/blogs"
 import { listCategories, type Category } from "@/lib/categories"
 
 const statusLabels: Record<string, string> = {
@@ -89,12 +95,17 @@ function PostsPage() {
 
   const [posts, setPosts] = useState<Blog[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const PAGE_SIZE = 10
+  const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState<(typeof filters)[number]>("All")
   const [categories, setCategories] = useState<Category[]>([])
   const [categoryFilterIds, setCategoryFilterIds] = useState<string[]>([])
   const [postPendingDelete, setPostPendingDelete] = useState<Blog | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [postPendingPermanentDelete, setPostPendingPermanentDelete] =
+    useState<Blog | null>(null)
+  const [isPermanentlyDeleting, setIsPermanentlyDeleting] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -154,6 +165,23 @@ function PostsPage() {
     })
   }, [search, filter, categoryFilterIds, posts])
 
+  // Reset to page 1 whenever the filter criteria change, following React's
+  // "adjust state during render" pattern instead of an Effect (avoids an
+  // extra render pass just to reset pagination).
+  const filterKey = `${search}|${filter}|${categoryFilterIds.join(",")}`
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey)
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey)
+    setPage(1)
+  }
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pagedPosts = filteredPosts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  )
+
   const handleDuplicate = async (post: Blog) => {
     try {
       const created = await createBlog({
@@ -194,6 +222,29 @@ function PostsPage() {
       )
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const confirmPermanentDelete = async () => {
+    if (!postPendingPermanentDelete?._id) {
+      return
+    }
+    setIsPermanentlyDeleting(true)
+    try {
+      await permanentlyDeleteBlog(postPendingPermanentDelete._id)
+      setPosts((current) =>
+        current.filter((item) => item._id !== postPendingPermanentDelete._id)
+      )
+      toast.success("Post permanently deleted")
+      setPostPendingPermanentDelete(null)
+    } catch (err) {
+      toast.error(
+        err instanceof ApiError
+          ? err.message
+          : "Unable to permanently delete post."
+      )
+    } finally {
+      setIsPermanentlyDeleting(false)
     }
   }
 
@@ -363,7 +414,7 @@ function PostsPage() {
                 ))}
 
               {!isLoading &&
-                filteredPosts.map((post) => {
+                pagedPosts.map((post) => {
                   const label = statusLabels[post.status ?? ""] ?? "Draft"
                   return (
                     <TableRow key={post._id} className="border-[#E8E8EC]">
@@ -425,7 +476,7 @@ function PostsPage() {
                               <MoreVertical className="size-4" />
                             </button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
+                          <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem
                               onSelect={() =>
                                 navigate("/posts/new", {
@@ -445,6 +496,14 @@ function PostsPage() {
                               onSelect={() => setPostPendingDelete(post)}
                             >
                               Delete
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onSelect={() =>
+                                setPostPendingPermanentDelete(post)
+                              }
+                            >
+                              Delete Permanently
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -468,23 +527,29 @@ function PostsPage() {
 
           <div className="flex flex-col gap-3 border-t border-[#E8E8EC] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-[#8C8C8C]">
-              Showing {filteredPosts.length} of {posts.length} posts
+              {filteredPosts.length === 0
+                ? `Showing 0 of ${posts.length} posts`
+                : `Showing ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, filteredPosts.length)} of ${filteredPosts.length} posts`}
             </p>
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                disabled
-                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#C4C4C4] disabled:cursor-not-allowed"
+                disabled={currentPage <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#4A4A4A] hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:text-[#C4C4C4] disabled:hover:bg-transparent"
               >
                 ‹
               </button>
               <span className="flex size-8 items-center justify-center rounded-lg bg-[#E97451] text-sm font-semibold text-white">
-                1
+                {currentPage}
               </span>
               <button
                 type="button"
-                disabled
-                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#C4C4C4] disabled:cursor-not-allowed"
+                disabled={currentPage >= totalPages}
+                onClick={() =>
+                  setPage((current) => Math.min(totalPages, current + 1))
+                }
+                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#4A4A4A] hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:text-[#C4C4C4] disabled:hover:bg-transparent"
               >
                 ›
               </button>
@@ -501,9 +566,24 @@ function PostsPage() {
           }
         }}
         title="Delete post?"
-        description={`This will permanently delete "${postPendingDelete?.title ?? ""}". This can't be undone.`}
+        description={`This will remove "${postPendingDelete?.title ?? ""}" from your posts. It won't be visible anywhere, but the record is kept — use "Delete Permanently" instead if you want it gone for good.`}
         onConfirm={confirmDelete}
         isDeleting={isDeleting}
+      />
+
+      <DeleteConfirmDialog
+        open={postPendingPermanentDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPostPendingPermanentDelete(null)
+          }
+        }}
+        title="Delete post permanently?"
+        description={`This will permanently delete "${postPendingPermanentDelete?.title ?? ""}" and cannot be undone.`}
+        onConfirm={confirmPermanentDelete}
+        isDeleting={isPermanentlyDeleting}
+        confirmLabel="Delete Permanently"
+        confirmingLabel="Deleting…"
       />
     </DashboardLayout>
   )

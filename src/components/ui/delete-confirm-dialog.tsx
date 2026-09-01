@@ -16,6 +16,8 @@ type DeleteConfirmDialogProps = {
   description: string
   onConfirm: () => void
   isDeleting?: boolean
+  confirmLabel?: string
+  confirmingLabel?: string
 }
 
 function DeleteConfirmDialog({
@@ -25,6 +27,8 @@ function DeleteConfirmDialog({
   description,
   onConfirm,
   isDeleting = false,
+  confirmLabel = "Delete",
+  confirmingLabel = "Deleting…",
 }: DeleteConfirmDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -43,7 +47,7 @@ function DeleteConfirmDialog({
               onConfirm()
             }}
           >
-            {isDeleting ? "Deleting…" : "Delete"}
+            {isDeleting ? confirmingLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -113,8 +113,23 @@ async function updateBlog(
   return response.data
 }
 
+/**
+ * Soft delete — sets `deletedAt` on the record server-side. The post
+ * disappears from every list/get endpoint immediately, but the row still
+ * exists in the database. There is currently no endpoint to list or
+ * restore soft-deleted posts (verified against the live API), so treat
+ * this as reversible only in principle until that's added.
+ */
 async function deleteBlog(blogId: string): Promise<void> {
   await apiFetch(`/v1/admin/blogs/${blogId}`, { method: "DELETE" })
+}
+
+/**
+ * Hard delete — irreversible. Works regardless of whether the post was
+ * already soft-deleted first.
+ */
+async function permanentlyDeleteBlog(blogId: string): Promise<void> {
+  await apiFetch(`/v1/admin/blogs/${blogId}/destroy`, { method: "DELETE" })
 }
 
 export {
@@ -124,6 +139,7 @@ export {
   getReviewerId,
   listAllBlogs,
   listBlogs,
+  permanentlyDeleteBlog,
   updateBlog,
 }
 export type { Blog, BlogCreateBody, BlogUpdateBody }
