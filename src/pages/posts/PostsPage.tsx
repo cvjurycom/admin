@@ -95,6 +95,8 @@ function PostsPage() {
 
   const [posts, setPosts] = useState<Blog[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const PAGE_SIZE = 10
+  const [page, setPage] = useState(1)
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState<(typeof filters)[number]>("All")
   const [categories, setCategories] = useState<Category[]>([])
@@ -162,6 +164,23 @@ function PostsPage() {
       return matchesFilter && matchesSearch && matchesCategory
     })
   }, [search, filter, categoryFilterIds, posts])
+
+  // Reset to page 1 whenever the filter criteria change, following React's
+  // "adjust state during render" pattern instead of an Effect (avoids an
+  // extra render pass just to reset pagination).
+  const filterKey = `${search}|${filter}|${categoryFilterIds.join(",")}`
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey)
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey)
+    setPage(1)
+  }
+
+  const totalPages = Math.max(1, Math.ceil(filteredPosts.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pagedPosts = filteredPosts.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  )
 
   const handleDuplicate = async (post: Blog) => {
     try {
@@ -395,7 +414,7 @@ function PostsPage() {
                 ))}
 
               {!isLoading &&
-                filteredPosts.map((post) => {
+                pagedPosts.map((post) => {
                   const label = statusLabels[post.status ?? ""] ?? "Draft"
                   return (
                     <TableRow key={post._id} className="border-[#E8E8EC]">
@@ -508,23 +527,29 @@ function PostsPage() {
 
           <div className="flex flex-col gap-3 border-t border-[#E8E8EC] px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-[#8C8C8C]">
-              Showing {filteredPosts.length} of {posts.length} posts
+              {filteredPosts.length === 0
+                ? `Showing 0 of ${posts.length} posts`
+                : `Showing ${(currentPage - 1) * PAGE_SIZE + 1}–${Math.min(currentPage * PAGE_SIZE, filteredPosts.length)} of ${filteredPosts.length} posts`}
             </p>
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
-                disabled
-                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#C4C4C4] disabled:cursor-not-allowed"
+                disabled={currentPage <= 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#4A4A4A] hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:text-[#C4C4C4] disabled:hover:bg-transparent"
               >
                 ‹
               </button>
               <span className="flex size-8 items-center justify-center rounded-lg bg-[#E97451] text-sm font-semibold text-white">
-                1
+                {currentPage}
               </span>
               <button
                 type="button"
-                disabled
-                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#C4C4C4] disabled:cursor-not-allowed"
+                disabled={currentPage >= totalPages}
+                onClick={() =>
+                  setPage((current) => Math.min(totalPages, current + 1))
+                }
+                className="flex size-8 items-center justify-center rounded-lg border border-[#E8E8EC] text-[#4A4A4A] hover:bg-[#F7F8FA] disabled:cursor-not-allowed disabled:text-[#C4C4C4] disabled:hover:bg-transparent"
               >
                 ›
               </button>
