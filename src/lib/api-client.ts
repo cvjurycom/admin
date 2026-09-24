@@ -3,7 +3,7 @@
 // hits the Render backend directly.
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ??
-  (import.meta.env.PROD ? "/api" : "https://cvjury.onrender.com/api")
+  (import.meta.env.PROD ? "/api" : "https://cvjury.bonto.run/api")
 
 const ACCESS_TOKEN_KEY = "cvjury_access_token"
 // Duplicated from auth.ts's USER_KEY to avoid a circular import between the
