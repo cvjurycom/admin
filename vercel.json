@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://cvjury.onrender.com/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://cvjury.bonto.run/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
