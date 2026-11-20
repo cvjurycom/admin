@@ -32,6 +32,32 @@ function clearAccessToken() {
   localStorage.removeItem(ACCESS_TOKEN_KEY)
 }
 
+/**
+ * On a validation failure the API's top-level `message` is just the generic
+ * "Validation error." — the actual field-level reasons come back separately
+ * as `error: string[]` (verified directly against the live backend, e.g.
+ * POST /v1/auth/login with a bad body returns
+ * `{ message: "Validation error.", error: ["email must be a valid email", ...] }`).
+ * Prefer those specific messages whenever present instead of the generic one.
+ */
+function extractErrorMessage(body: unknown): string {
+  if (!body || typeof body !== "object") {
+    return "Something went wrong. Please try again."
+  }
+
+  const record = body as Record<string, unknown>
+  const details = Array.isArray(record.error)
+    ? record.error.filter((item): item is string => typeof item === "string")
+    : []
+  if (details.length > 0) {
+    return details.join(" ")
+  }
+
+  return typeof record.message === "string"
+    ? record.message
+    : "Something went wrong. Please try again."
+}
+
 async function apiFetch<TResponse>(
   path: string,
   options: RequestInit = {}
@@ -50,10 +76,7 @@ async function apiFetch<TResponse>(
   const body = await response.json().catch(() => null)
 
   if (!response.ok) {
-    const message =
-      (body && typeof body === "object" && "message" in body
-        ? String(body.message)
-        : null) ?? "Something went wrong. Please try again."
+    const message = extractErrorMessage(body)
 
     // A request that carried a token but comes back 401 (expired/invalid
     // token) or "User not found" (the token is a valid JWT but the account
